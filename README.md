@@ -1,0 +1,1 @@
+# ClickHouse with otel collector
