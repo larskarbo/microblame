@@ -65,30 +65,14 @@ export const QueryRow = ({ pgRow: pgRow }: { pgRow: PgRow }) => {
               role="status"
             ></div>
           ) : null}
-          {tracedQueryWithStats?.distinctPrismaSpans?.[0] && (
-            <div>
-              {tracedQueryWithStats.distinctPrismaSpans[0]}
-              {tracedQueryWithStats.distinctPrismaSpans.length > 1 && (
-                <span className="text-gray-600">
-                  (and {tracedQueryWithStats.distinctPrismaSpans.length - 1}{" "}
-                  more)
-                </span>
-              )}
-            </div>
-          )}
+          <ItemWithCountPreview
+            items={tracedQueryWithStats?.distinctHttpTargetsWithCount || []}
+          />
         </td>
         <td className="pr-2">
-          {tracedQueryWithStats?.distinctTRPCSpans?.[0] && (
-            <div>
-              {tracedQueryWithStats.distinctTRPCSpans[0]}
-              {tracedQueryWithStats.distinctTRPCSpans.length > 1 && (
-                <span className="text-gray-600">
-                  {" "}
-                  (+{tracedQueryWithStats.distinctTRPCSpans.length - 1})
-                </span>
-              )}
-            </div>
-          )}
+          <ItemWithCountPreview
+            items={tracedQueryWithStats?.distinctServiceNamesWithCount || []}
+          />
         </td>
       </tr>
       {isOpen && (
@@ -113,42 +97,34 @@ export const QueryRow = ({ pgRow: pgRow }: { pgRow: PgRow }) => {
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           Prisma spans:
-                          <textarea
-                            className="w-full h-24"
-                            readOnly
-                            value={tracedQueryWithStats?.distinctPrismaSpans?.join(
-                              "\n"
-                            )}
+                          <ItemsTextarea
+                            items={
+                              tracedQueryWithStats.distinctPrismaSpansWithCount
+                            }
                           />
                         </div>
                         <div>
                           TRPC spans:
-                          <textarea
-                            className="w-full h-24"
-                            readOnly
-                            value={tracedQueryWithStats?.distinctTRPCSpans?.join(
-                              "\n"
-                            )}
+                          <ItemsTextarea
+                            items={
+                              tracedQueryWithStats.distinctTRPCSpansWithCount
+                            }
                           />
                         </div>
                         <div>
                           Service names:
-                          <textarea
-                            className="w-full h-24"
-                            readOnly
-                            value={tracedQueryWithStats?.distinctServiceNames?.join(
-                              "\n"
-                            )}
+                          <ItemsTextarea
+                            items={
+                              tracedQueryWithStats.distinctServiceNamesWithCount
+                            }
                           />
                         </div>
                         <div>
                           Http paths:
-                          <textarea
-                            className="w-full h-24"
-                            readOnly
-                            value={tracedQueryWithStats?.distinctHttpTargets?.join(
-                              "\n"
-                            )}
+                          <ItemsTextarea
+                            items={
+                              tracedQueryWithStats.distinctHttpTargetsWithCount
+                            }
                           />
                         </div>
                       </div>
@@ -172,5 +148,41 @@ export const QueryRow = ({ pgRow: pgRow }: { pgRow: PgRow }) => {
         </>
       )}
     </>
+  );
+};
+
+const ItemWithCountPreview = ({
+  items,
+}: {
+  items: {
+    name: string;
+    count: number;
+  }[];
+}) => {
+  return (
+    <div>
+      {items?.[0] && (
+        <div>
+          {items?.[0].name}
+          {items.length > 1 && (
+            <span className="text-gray-600"> (+{items.length - 1})</span>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
+const ItemsTextarea = ({
+  items,
+}: {
+  items: { name: string; count: number }[];
+}) => {
+  return (
+    <textarea
+      className="w-full h-24"
+      readOnly
+      value={items.map((item) => `${item.name} (${item.count})`).join("\n")}
+    />
   );
 };

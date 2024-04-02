@@ -6,12 +6,12 @@ type TracedQueryStats = {
   calls: number;
   avgDurMs: number;
   totalDuration: number;
-  distinctPrismaSpans: string[];
-  distinctTRPCSpans: string[];
-  distinctHttpTargets: string[];
-  distinctServiceNames: string[];
-	firstSeenAt: string;
-	lastSeenAt: string;
+  distinctPrismaSpansWithCount: [string, string][];
+  distinctTRPCSpansWithCount: [string, string][];
+  distinctHttpTargetsWithCount: [string, string][];
+  distinctServiceNamesWithCount: [string, string][];
+  firstSeenAt: string;
+  lastSeenAt: string;
 };
 
 export const getTracedQueriesWithStats = async ({
@@ -26,10 +26,38 @@ export const getTracedQueriesWithStats = async ({
 		count(*) AS calls,
 		round(avg(durationNano) / 1000000) AS avgDurMs,
 		round(sum(durationNano) / 1000000) AS totalDuration,
-		arrayDistinct(groupArray(prismaSpan)) AS distinctPrismaSpans,
-		arrayDistinct(groupArray(trpcSpan)) AS distinctTRPCSpans,
-		arrayDistinct(groupArray(httpTarget)) AS distinctHttpTargets,
-		arrayDistinct(groupArray(serviceName)) AS distinctServiceNames,
+		arrayMap((x, y) -> (x, y),
+        (arrayReduce(
+            'sumMap',
+            [(groupArrayArray([prismaSpan]) as arrPrismaSpan)],
+            [arrayResize(CAST([], 'Array(UInt64)'), length(arrPrismaSpan), toUInt64(1))]
+        ) as sPrismaSpan).1,
+        sPrismaSpan.2
+    ) distinctPrismaSpansWithCount,
+		arrayMap((x, y) -> (x, y),
+				(arrayReduce(
+						'sumMap',
+						[(groupArrayArray([trpcSpan]) as arrTRPCSpan)],
+						[arrayResize(CAST([], 'Array(UInt64)'), length(arrTRPCSpan), toUInt64(1))]
+				) as sTRPCSpan).1,
+				sTRPCSpan.2
+		) distinctTRPCSpansWithCount,
+		arrayMap((x, y) -> (x, y),
+				(arrayReduce(
+						'sumMap',
+						[(groupArrayArray([httpTarget]) as arrHttpTarget)],
+						[arrayResize(CAST([], 'Array(UInt64)'), length(arrHttpTarget), toUInt64(1))]
+				) as sHttpTarget).1,
+				sHttpTarget.2
+		) distinctHttpTargetsWithCount,
+		arrayMap((x, y) -> (x, y),
+				(arrayReduce(
+						'sumMap',
+						[(groupArrayArray([serviceName]) as arrServiceName)],
+						[arrayResize(CAST([], 'Array(UInt64)'), length(arrServiceName), toUInt64(1))]
+				) as sServiceName).1,
+				sServiceName.2
+		) distinctServiceNamesWithCount,
 		min(timestamp) AS firstSeenAt,
 		max(timestamp) AS lastSeenAt
 	FROM
@@ -48,17 +76,32 @@ export const getTracedQueriesWithStats = async ({
 
 	`);
 
-  const rowsWithEmptyItemsInArraysRemoved = rows.map((row) => {
+  const rowsWithItemsSorted = rows.map((row) => {
     return {
       ...row,
-      distinctPrismaSpans: row.distinctPrismaSpans.filter((a) => a != ""),
-      distinctTRPCSpans: row.distinctTRPCSpans.filter((a) => a != ""),
-      distinctHttpTargets: row.distinctHttpTargets.filter((a) => a != ""),
-      distinctServiceNames: row.distinctServiceNames.filter((a) => a != ""),
+      distinctHttpTargetsWithCount: filterAndSort(
+        row.distinctHttpTargetsWithCount
+      ),
+      distinctPrismaSpansWithCount: filterAndSort(
+        row.distinctPrismaSpansWithCount
+      ),
+      distinctTRPCSpansWithCount: filterAndSort(row.distinctTRPCSpansWithCount),
+      distinctServiceNamesWithCount: filterAndSort(
+        row.distinctServiceNamesWithCount
+      ),
     };
   });
-  return rowsWithEmptyItemsInArraysRemoved;
+  return rowsWithItemsSorted;
 };
+
+const filterAndSort = (arr: [string, string][]) =>
+  arr
+    .map(([a, b]) => ({
+      name: a,
+      count: parseInt(b),
+    }))
+    .sort((a, b) => b.count - a.count)
+    .filter((x) => x.name !== "");
 
 export const getTracedQueryWithStats = async ({
   statementHash,
