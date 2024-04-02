@@ -5,7 +5,7 @@
 		"dev": "next dev --port 3002",
 		"build": "next build",
 		"start": "next start",
-		"start-worker-pm2": "pm2 start --interpreter ~/.bun/bin/bun scripts/tracedQueriesGeneratorStart.ts"
+		"start-worker-pm2": "pm2 start --interpreter bun scripts/tracedQueriesGeneratorStart.ts"
 	},
 	"version": "0.1.0",
 	"dependencies": {
