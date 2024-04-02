@@ -71,7 +71,7 @@ export const QueryRow = ({ pgRow: pgRow }: { pgRow: PgRow }) => {
         </td>
         <td className="pr-2">
           <ItemWithCountPreview
-            items={tracedQueryWithStats?.distinctServiceNamesWithCount || []}
+            items={tracedQueryWithStats?.distinctTRPCSpansWithCount || []}
           />
         </td>
       </tr>
