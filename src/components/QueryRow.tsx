@@ -66,7 +66,7 @@ export const QueryRow = ({ pgRow: pgRow }: { pgRow: PgRow }) => {
             ></div>
           ) : null}
           <ItemWithCountPreview
-            items={tracedQueryWithStats?.distinctHttpTargetsWithCount || []}
+            items={tracedQueryWithStats?.distinctPrismaSpansWithCount || []}
           />
         </td>
         <td className="pr-2">
