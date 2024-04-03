@@ -13,6 +13,7 @@ services:
       interval: 5s
       timeout: 10s
       retries: 3
+    restart: unless-stopped
 
   otel-collector:
     image: otel/opentelemetry-collector-contrib
@@ -29,6 +30,7 @@ services:
       - 4317:4317 # OTLP gRPC receiver
       - 4318:4318 # OTLP http receiver
       - 55679:55679 # zpages extension
+    restart: unless-stopped
   nextjs-app:
     depends_on:
       clickhouse:
@@ -38,6 +40,7 @@ services:
       - 3004:3000
     environment:
       - CLICKHOUSE_URI=http://clickhouse:8123
+    restart: unless-stopped
   worker:
     depends_on:
       clickhouse:
@@ -46,3 +49,4 @@ services:
       dockerfile: ./worker.Dockerfile
     environment:
       - CLICKHOUSE_URI=http://clickhouse:8123
+    restart: unless-stopped
