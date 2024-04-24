@@ -4,7 +4,7 @@ MicroBlame lets you pair data from `pg_stat_statements` with observability data 
 
 ## Installation
 
-Add `REDIS_URL`, `PG_MAIN_DATABASE_URI` and `PG_READ_DATABASE_URI` to a `.env` file.
+Add  `PG_MAIN_DATABASE_URI` and `PG_READ_DATABASE_URI` to a `.env` file.
 
 Then run:
 

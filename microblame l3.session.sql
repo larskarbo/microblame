@@ -18,3 +18,13 @@ arraySort(
 		traced_queries
 	GROUP BY
 		statementHash;
+
+
+--@block oldest row
+SELECT
+		*
+	FROM
+		traced_queries
+	ORDER BY
+		timestamp ASC
+	LIMIT 1;
