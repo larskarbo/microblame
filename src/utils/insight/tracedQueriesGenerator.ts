@@ -9,24 +9,11 @@ import {
   getLastProcessedUberTimestamp,
   processBatch,
 } from "./clickhouseQueries";
-import { everythingRedis } from "./redis";
 import { createTracedQueriesTableIfNotExists } from "./createTracedQueriesTable";
 
 process.env.TZ = "UTC";
 
-const redis = everythingRedis;
 const processOne = async () => {
-  const enabled =
-    process.env.TRACED_QUERY_GENERATOR_IS_ENABLED ||
-    (await redis.get("traced-queries-generator-enabled"));
-
-  if (enabled !== "1") {
-    console.log("Traced queries processing is disabled");
-    await new Promise((resolve) => setTimeout(resolve, 10000));
-    void processOne();
-    return;
-  }
-
   const maxProcessTo = subSeconds(new Date(), 30);
 
   let lastProcessedTimestamp = await getLastProcessedUberTimestamp();

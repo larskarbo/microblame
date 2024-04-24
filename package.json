@@ -2,7 +2,7 @@
 	"name": "web",
 	"private": true,
 	"scripts": {
-		"dev": "next dev --port 3002",
+		"dev": "next dev --port 3005",
 		"build": "next build",
 		"start": "next start",
 		"start-worker-pm2": "pm2 start --interpreter bun scripts/tracedQueriesGeneratorStart.ts"

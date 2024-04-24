@@ -5,7 +5,7 @@ import {
   findSingleTracedQueryByStatementHash,
 } from "../../utils/insight/clickhouseQueries";
 import { getPgData } from "../../utils/insight/getPgData";
-import { everythingRedis } from "../../utils/insight/redis";
+import { redisInstance } from "../../utils/insight/redis";
 import { getTracedQueryWithStats } from "../../utils/insight/tracedQueryWithStats";
 import { removeComments } from "../../utils/insight/utils";
 import { procedure, router } from "../trpc";
@@ -58,7 +58,7 @@ export const insightRouter = router({
       const { query, queryid } = input;
 
       const queryWithoutComment = removeComments(query);
-      const statementHashCached = await everythingRedis.get(
+      const statementHashCached = await redisInstance.get(
         `pg-query-id-to-statement-hash:${queryid}`
       );
 
@@ -83,20 +83,11 @@ export const insightRouter = router({
         : undefined;
 
       if (tracedQuery) {
-        await everythingRedis.set(
+        await redisInstance.set(
           `pg-query-id-to-statement-hash:${queryid}`,
           tracedQuery.statementHash
         );
       }
-
-      // fetchedNum++
-      // console.log(
-      //   `Fetched ${fetchedNum} of ${queriesThatMatter.length} queries`,
-      //   `${!tracedQuery ? chalk.red("(no trace found)") : ""}`,
-      //   `${
-      //     statementHashCached ? chalk.yellow("(statement hash cached ✨)") : ""
-      //   }`
-      // )
 
       return {
         sampleTracedQuery: tracedQuery,

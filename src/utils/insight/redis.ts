@@ -1,8 +1,8 @@
 import { getEnv } from "@larskarbo/get-env";
 import Redis from "ioredis";
 
-export const getEverythingRedis = () => {
+const getRedisInstance = () => {
   return new Redis(getEnv("REDIS_URL"));
 };
 
-export const everythingRedis = getEverythingRedis();
+export const redisInstance = getRedisInstance();
