@@ -29,7 +29,7 @@ const PostgresTester = ({ instance }: { instance: "main" | "readonly" }) => {
         </Button>
       </div>
       {data && (
-        <ul className="text-xs">
+        <ul className="text-xs font-medium list-disc">
           {data.canSelect1.status === "success" ? (
             <li className="text-green-800">Connection successful ✅</li>
           ) : (
@@ -53,7 +53,7 @@ const PostgresTester = ({ instance }: { instance: "main" | "readonly" }) => {
                     </strong>
                     ).
                   </li>
-                  <ul>
+                  <ul className=" list-disc ">
                     <li>
                       Make sure you have the <code>pg_stat_statements</code>{" "}
                       extension enabled.
@@ -136,7 +136,7 @@ const ClickHouseStatus = () => {
               {error.message}
             </div>
           ) : (
-            <ul>
+            <ul className=" list-disc">
               <li>
                 <InlineCode>otel_traces</InlineCode>: There are{" "}
                 <strong>{stats.otelTracesCount}</strong> traces{" "}
