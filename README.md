@@ -1,6 +1,6 @@
-# MicroBlame
+# microblame
 
-MicroBlame lets you pair data from `pg_stat_statements` with observability data to help you understand find slow db queries and where they are coming from.
+Microblame lets you pair data from `pg_stat_statements` with observability data to help you understand find slow db queries and where they are coming from.
 
 ![alt text](shot-UZ7m12se.png)
 
