@@ -1,6 +1,5 @@
 import { useState } from "react";
 
-import { ChartBarSquareIcon } from "@heroicons/react/24/outline";
 import { Button } from "../components/Button";
 import Layout from "../components/Layout";
 import { QueryRow } from "../components/QueryRow";
