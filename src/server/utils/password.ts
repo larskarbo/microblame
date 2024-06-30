@@ -1,12 +1,23 @@
 import { createCipheriv, createDecipheriv, randomBytes } from "crypto";
 import { getEnv } from "@larskarbo/get-env";
 
+export const getEncryptionKey = () => {
+  const passwordEncryptionSecret = getEnv("PASSWORD_ENCRYPTION_SECRET");
+  const key = Buffer.from(passwordEncryptionSecret, "hex");
+  if (key.length !== 32) {
+    console.error("Encryption key must be 32 bytes (256 bits).");
+    throw new Error("Encryption key must be 32 bytes (256 bits).");
+  }
+  return key;
+};
+
 export const encryptPassword = async (password: string) => {
+  console.log("password: ", password);
   if (password === "") {
     return "";
   }
 
-  const passwordEncryptionSecret = getEnv("PASSWORD_ENCRYPTION_SECRET");
+  const passwordEncryptionSecret = getEncryptionKey();
 
   const iv = randomBytes(16);
   const cipher = createCipheriv("aes-256-cbc", passwordEncryptionSecret, iv);
@@ -21,7 +32,7 @@ export const decryptPassword = async (encryptedPassword: string) => {
     return "";
   }
 
-  const passwordEncryptionSecret = getEnv("PASSWORD_ENCRYPTION_SECRET");
+  const passwordEncryptionSecret = getEncryptionKey();
 
   const [ivHex, encrypted] = encryptedPassword.split(":");
   if (!ivHex || !encrypted) {

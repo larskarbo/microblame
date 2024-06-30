@@ -4,6 +4,7 @@ import "prismjs/themes/prism-tomorrow.css";
 import "typeface-merriweather";
 import "../global.css";
 import { trpc } from "../utils/trpc";
+import toast, { Toaster } from "react-hot-toast";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -17,6 +18,15 @@ function MyApp({ Component, pageProps }: AppProps) {
   return (
     <QueryClientProvider client={queryClient}>
       <Component {...pageProps} />
+
+      <Toaster
+        toastOptions={{
+          style: {
+            maxWidth: 450,
+            wordBreak: "break-word",
+          },
+        }}
+      />
     </QueryClientProvider>
   );
 }

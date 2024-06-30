@@ -76,16 +76,6 @@ export const setupRouter = router({
         throw new Error("Password not provided");
       }
 
-      // const password
-      console.log(`test`, {
-        user: input.pgUser,
-        password: password,
-        host: input.pgHost,
-        port: input.pgPort,
-        database: input.pgDatabase,
-        ssl: input.ssl ? { rejectUnauthorized: false } : false,
-      });
-
       const postgresJsInstance = postgres({
         user: input.pgUser,
         password: password,

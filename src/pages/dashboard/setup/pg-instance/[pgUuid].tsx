@@ -9,6 +9,38 @@ import { Button } from "../../../../components/Button";
 import { InlineCode } from "../../../../components/InlineCode";
 import { Input } from "../../../../components/Input";
 import { zodStringOrNumberToNumber } from "../../../../components/utils";
+import { ClipboardDocumentIcon } from "@heroicons/react/24/outline";
+import toast from "react-hot-toast";
+
+const parseConnectionString = (
+  connectionString: string
+): Partial<PgInstance> => {
+  // Replace 'postgres://' with 'http://' to make it compatible with the URL constructor
+  const modifiedConnectionString = connectionString
+    .replace(/^postgres:\/\//, "http://")
+    .replace(/^postgresql:\/\//, "http://");
+  const url = new URL(modifiedConnectionString);
+  console.log("url: ", url);
+
+  const ssl = url.searchParams.get("sslmode") === "require";
+  const pgUser = url.username;
+  const pgPassword = url.password;
+  const pgHost = url.hostname;
+  const pgPort = parseInt(url.port, 10);
+  const pgDatabase = url.pathname.slice(1);
+
+  return {
+    pgUser,
+    pgPassword: {
+      existingPasswordToPgInstanceUuid: null,
+      newPassword: pgPassword,
+    },
+    pgHost,
+    pgPort,
+    pgDatabase,
+    ssl,
+  };
+};
 
 const SetupPage = () => {
   const { data: me } = trpc.me.useQuery();
@@ -60,6 +92,8 @@ type PgInstance = z.infer<typeof pgInstanceSchema>;
 
 const NewPostgresInstanceForm = ({ pgUuid }: { pgUuid: string }) => {
   const { data: me } = trpc.me.useQuery();
+
+  const [connectionString, setConnectionString] = useState("");
 
   const router = useRouter();
 
@@ -116,7 +150,7 @@ const NewPostgresInstanceForm = ({ pgUuid }: { pgUuid: string }) => {
   }
 
   return (
-    <div className="max-w-xl space-y-4">
+    <div className="max-w-xl flex flex-col gap-4">
       <div>
         <div>Name</div>
         <div>
@@ -130,6 +164,37 @@ const NewPostgresInstanceForm = ({ pgUuid }: { pgUuid: string }) => {
             }}
             value={workingPginstace.name}
           />
+        </div>
+      </div>
+      <div className="px-4 py-4 my-2 border bg-slate-100">
+        <div className="flex items-center gap-1 mb-2">
+          <ClipboardDocumentIcon className="w-3 h-3" />
+          Paste connection string
+        </div>
+        <div className="flex space-x-4">
+          <Input
+            placeholder="postgres://user:password@host:port/database?sslmode=require"
+            onChange={(e) => {
+              setConnectionString(e.target.value);
+            }}
+            value={connectionString}
+          />
+          <Button
+            disabled={connectionString === ""}
+            onClick={() => {
+              try {
+                const parsedInstance = parseConnectionString(connectionString);
+                setWorkingPgInstance((w) => ({
+                  ...w,
+                  ...parsedInstance,
+                }));
+              } catch (error) {
+                toast.error("Failed to parse connection string");
+              }
+            }}
+          >
+            Parse
+          </Button>
         </div>
       </div>
       <div>
@@ -237,6 +302,25 @@ const NewPostgresInstanceForm = ({ pgUuid }: { pgUuid: string }) => {
             }}
             value={workingPginstace.pgDatabase}
           />
+        </div>
+      </div>
+
+      <div>
+        <div>SSL</div>
+        <div>
+          <select
+            className="rounded-md border bg-transparent px-3 py-1"
+            onChange={(e) => {
+              setWorkingPgInstance({
+                ...workingPginstace,
+                ssl: e.target.value === "true",
+              });
+            }}
+            value={workingPginstace.ssl.toString()}
+          >
+            <option value="true">Yes</option>
+            <option value="false">No</option>
+          </select>
         </div>
       </div>
 

@@ -1,6 +1,7 @@
 import {
   ChartBarSquareIcon,
   CommandLineIcon,
+  ArrowLeftEndOnRectangleIcon,
 } from "@heroicons/react/24/outline";
 import clsx from "clsx";
 import { useRouter } from "next/router";
@@ -16,6 +17,12 @@ const navigation = [
     icon: ChartBarSquareIcon,
     current: true,
   },
+  // {
+  //   name: "Postgres Connections",
+  //   href: "/dashboard/connections",
+  //   icon: ArrowLeftEndOnRectangleIcon,
+  //   current: true,
+  // },
   {
     name: "Setup",
     href: "/dashboard/setup",
