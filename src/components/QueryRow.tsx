@@ -40,7 +40,6 @@ export const QueryRow = ({ pgRow: pgRow }: { pgRow: PgRow }) => {
             <ChevronRightIcon className="w-3 h-3" />
           )}
         </td>
-        <td>{pgRow.instance}</td>
         <td>
           {truncate(pgRow.query, {
             length: 20,

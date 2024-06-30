@@ -1,28 +1,21 @@
-import {
-  getTopPgQueries,
-  mainPostgres,
-  readPostgres,
-} from "./pgStatQueries"
+import postgres from "postgres";
+import { getTopPgQueries } from "./pgStatQueries";
 
 export const getPgData = async ({
   order,
-  instance,
+  postgresJsInstance,
 }: {
-  order: "total_exec_time" | "mean_exec_time"
-  instance: "main" | "readonly"
+  order: "total_exec_time" | "mean_exec_time";
+  postgresJsInstance: postgres.Sql<{}>;
 }) => {
-  const postgresNode =
-    instance === "main" ? mainPostgres : readPostgres
-
   return (
-    await getTopPgQueries(postgresNode, {
+    await getTopPgQueries(postgresJsInstance, {
       limit: 25,
       order,
     })
-  ).map(row => {
+  ).map((row) => {
     return {
       ...row,
-      instance,
-    }
-  })
-}
+    };
+  });
+};

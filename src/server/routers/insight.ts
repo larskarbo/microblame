@@ -9,19 +9,26 @@ import { redisInstance } from "../../utils/insight/redis";
 import { getTracedQueryWithStats } from "../../utils/insight/tracedQueryWithStats";
 import { removeComments } from "../../utils/insight/utils";
 import { procedure, router } from "../trpc";
-import { mainPostgres, readPostgres } from "../../utils/insight/pgStatQueries";
+import { getPostgresJsInstanceIfUserHasAccess } from "../utils/pgInstance";
 
 export const insightRouter = router({
   getQueries: procedure
     .input(
       z.object({
-        instance: z.enum(["main", "readonly"]),
+        instanceUuid: z.string(),
       })
     )
-    .query(async ({ input }) => {
+    .query(async ({ input, ctx }) => {
+      const { user } = ctx;
+
+      const postgresJsInstance = await getPostgresJsInstanceIfUserHasAccess({
+        instanceUuid: input.instanceUuid,
+        user,
+      });
+
       const queries = await getPgData({
         order: "total_exec_time",
-        instance: input.instance,
+        postgresJsInstance,
       });
       return {
         queries,
@@ -31,14 +38,17 @@ export const insightRouter = router({
   resetPgStats: procedure
     .input(
       z.object({
-        instance: z.enum(["main", "readonly"]),
+        instanceUuid: z.string(),
       })
     )
-    .mutation(async ({ input }) => {
-      const { instance } = input;
-      const postgres = instance === "main" ? mainPostgres : readPostgres;
+    .mutation(async ({ input, ctx }) => {
+      const { user } = ctx;
+      const postgresJsInstance = await getPostgresJsInstanceIfUserHasAccess({
+        instanceUuid: input.instanceUuid,
+        user,
+      });
 
-      await postgres`
+      await postgresJsInstance`
 				select pg_stat_statements_reset();
 			`;
 

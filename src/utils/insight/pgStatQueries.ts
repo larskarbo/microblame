@@ -1,9 +1,5 @@
-import { getEnv } from "@larskarbo/get-env";
 import { round } from "lodash";
 import postgres from "postgres";
-
-export const mainPostgres = postgres(getEnv("PG_MAIN_DATABASE_URI"));
-export const readPostgres = postgres(getEnv("PG_READ_DATABASE_URI"));
 
 export type PgRow = {
   queryid: string;
@@ -15,7 +11,6 @@ export type PgRow = {
   mean_exec_time: number;
   stddev_exec_time: number;
   percentageOfLoad: number;
-  instance: "main" | "readonly";
 };
 
 export const getTopPgQueries = async (

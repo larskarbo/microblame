@@ -36,12 +36,26 @@ services:
     depends_on:
       clickhouse:
         condition: service_healthy
-    build: .
+      app-db:
+        condition: service_started
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
       - 3004:3000
     environment:
       - CLICKHOUSE_URI=http://clickhouse:8123
       - REDIS_URL=redis://redis:6379
+      - DATABASE_URL=postgres://user:password@app-db:5432/microblame
+      - PASSWORD_ENCRYPTION_SECRET=secret
+    restart: on-failure
+
+  app-db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: microblame
     restart: on-failure
 
   worker:
@@ -54,4 +68,3 @@ services:
       - CLICKHOUSE_URI=http://clickhouse:8123
       - REDIS_URL=redis://redis:6379
     restart: on-failure
-

@@ -5,32 +5,41 @@ import {
 import clsx from "clsx";
 import { useRouter } from "next/router";
 import React from "react";
+import { UserAndProjectConfig } from "../dashboard/UserAndProjectConfig";
+import { LoggedInPage } from "./auth";
+import { isMultiUser } from "../env";
 
 const navigation = [
   {
     name: "Top Postgres Queries",
-    href: "/",
+    href: "/dashboard",
     icon: ChartBarSquareIcon,
     current: true,
   },
   {
     name: "Setup",
-    href: "/setup",
+    href: "/dashboard/setup",
     icon: CommandLineIcon,
     current: false,
   },
 ];
 
+export const Logo = () => {
+  return (
+    <div className="font-bold font-mono">
+      microblame <span className="font-sans">⚡</span>
+    </div>
+  );
+};
+
 export const Layout = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
   return (
-    <div>
+    <LoggedInPage>
       <div className="fixed inset-y-0 z-50 flex flex-col w-72">
         <div className="flex flex-col px-6 overflow-y-auto grow gap-y-5 bg-black/10 ring-1 ring-white/5">
           <div className="flex items-center h-16 shrink-0">
-            <div className="font-bold font-mono">
-              microblame <span className="font-sans">⚡</span>
-            </div>
+            <Logo />
           </div>
           <nav className="flex flex-col flex-1">
             <ul role="list" className="flex flex-col flex-1 gap-y-7">
@@ -66,14 +75,16 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
                 </ul>
               </li>
 
-              <li className="p-4 mt-auto -mx-6 "></li>
+              <li className="p-4 mt-auto -mx-6 ">
+                {isMultiUser && <UserAndProjectConfig />}
+              </li>
             </ul>
           </nav>
         </div>
       </div>
 
       <div className="pl-72">{children}</div>
-    </div>
+    </LoggedInPage>
   );
 };
 

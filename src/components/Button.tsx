@@ -1,11 +1,14 @@
 import clsx from "clsx";
+import { Spinner } from "./Spinner";
 
 export const Button = ({
   children,
   className,
+  isLoading,
   ...props
 }: {
   children: React.ReactNode;
+  isLoading?: boolean;
   className?: string;
   disabled?: boolean;
 } & React.HTMLAttributes<HTMLButtonElement>) => {
@@ -23,7 +26,7 @@ export const Button = ({
       }}
       {...props}
     >
-      {children}
+      {isLoading ? <Spinner /> : children}
     </button>
   );
 };

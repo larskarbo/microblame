@@ -1,19 +1,105 @@
+import { isNull, omit } from "lodash";
+import postgres from "postgres";
 import { z } from "zod";
-import { mainPostgres, readPostgres } from "../../utils/insight/pgStatQueries";
-import { procedure, router } from "../trpc";
+import { prisma } from "../../db";
+import { pgInstanceSchema } from "../../pages/dashboard/setup/pg-instance/[pgUuid]";
 import { clickhouseQuery } from "../../utils/insight/clickhouse";
+import { requireAuth } from "../api/middleware";
+import { procedure, router } from "../trpc";
+import { decryptPassword, encryptPassword } from "../utils/password";
+import { ensureUserHasAccessToProject } from "../utils/project";
 
 export const setupRouter = router({
-  testPostgresConnection: procedure
-    .input(
-      z.object({
-        instance: z.enum(["main", "readonly"]),
-      })
-    )
-    .mutation(async ({ input }) => {
-      const pg = input.instance === "main" ? mainPostgres : readPostgres;
+  getPgInstance: procedure
+    .input(z.object({ pgUuid: z.string() }))
+    .query(async ({ input, ctx }) => {
+      const user = await requireAuth(ctx);
 
-      const canSelect1 = await pg`
+      const pgInstance = await prisma.pgInstance.findUniqueOrThrow({
+        where: {
+          uuid: input.pgUuid,
+        },
+        select: {
+          name: true,
+          id: true,
+          pgDatabase: true,
+          pgHost: true,
+          pgPort: true,
+          pgUser: true,
+          projectId: true,
+          ssl: true,
+          uuid: true,
+        },
+      });
+
+      const isInUserProjects = user?.Team.Projects.some((project) => {
+        return project.PgInstances.some((pg) => pg.uuid === input.pgUuid);
+      });
+
+      if (!isInUserProjects) {
+        throw new Error("PgInstance not found");
+      }
+
+      return pgInstance;
+    }),
+
+  testPgConnection: procedure
+    .input(pgInstanceSchema)
+    .mutation(async ({ input, ctx }) => {
+      const user = await requireAuth(ctx);
+
+      let password = input.pgPassword.newPassword;
+
+      if (!password && input.pgPassword.existingPasswordToPgInstanceUuid) {
+        const uuid = input.pgPassword.existingPasswordToPgInstanceUuid;
+        const pgInstance = await prisma.pgInstance.findUniqueOrThrow({
+          where: {
+            uuid: uuid,
+          },
+        });
+
+        const isInUserProjects = user?.Team.Projects.some((project) => {
+          return project.PgInstances.some((pg) => pg.uuid === uuid);
+        });
+
+        if (!isInUserProjects) {
+          throw new Error("PgInstance not found");
+        }
+
+        password = await decryptPassword(pgInstance.pgPasswordEncrypted);
+        console.log("password: ", password);
+        console.log("password: ", password.length);
+        console.log("pgInstance: ", pgInstance);
+      }
+
+      if (isNull(password)) {
+        throw new Error("Password not provided");
+      }
+
+      // const password
+      console.log(`test`, {
+        user: input.pgUser,
+        password: password,
+        host: input.pgHost,
+        port: input.pgPort,
+        database: input.pgDatabase,
+        ssl: input.ssl ? { rejectUnauthorized: false } : false,
+      });
+
+      const postgresJsInstance = postgres({
+        user: input.pgUser,
+        password: password,
+        host: input.pgHost,
+        port: input.pgPort,
+        database: input.pgDatabase,
+        ssl: input.ssl
+          ? {
+              rejectUnauthorized: false,
+            }
+          : false,
+      });
+
+      const canSelect1 = await postgresJsInstance`
 				select 1;
 			`
         .then(() => {
@@ -29,7 +115,7 @@ export const setupRouter = router({
           };
         });
 
-      const canUsePgStatStatements = await pg`
+      const canUsePgStatStatements = await postgresJsInstance`
 				select * from pg_stat_statements limit 1;
 			`
         .then(() => {
@@ -50,6 +136,73 @@ export const setupRouter = router({
         canSelect1,
         canUsePgStatStatements,
       };
+    }),
+
+  addPgInstance: procedure
+    .input(
+      z.object({
+        instance: pgInstanceSchema,
+        projectId: z.number(),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      const { instance, projectId } = input;
+      const { user } = ctx;
+
+      await ensureUserHasAccessToProject({
+        prisma,
+        user,
+        projectId,
+      });
+
+      const password = instance.pgPassword.newPassword;
+      if (isNull(password)) {
+        throw new Error("Password not provided");
+      }
+
+      return await prisma.pgInstance.create({
+        data: {
+          ...omit(instance, ["pgPassword"]),
+          pgPasswordEncrypted: await encryptPassword(password),
+          projectId: input.projectId,
+        },
+      });
+    }),
+
+  updatePgInstance: procedure
+    .input(
+      z.object({
+        uuid: z.string(),
+        instance: pgInstanceSchema,
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      const { instance, uuid } = input;
+      const { user } = ctx;
+
+      const pgInstance = await prisma.pgInstance.findUniqueOrThrow({
+        where: {
+          uuid,
+        },
+      });
+
+      await ensureUserHasAccessToProject({
+        prisma,
+        user,
+        projectId: pgInstance.projectId,
+      });
+
+      return await prisma.pgInstance.update({
+        where: {
+          uuid,
+        },
+        data: {
+          ...omit(instance, ["pgPassword"]),
+          pgPasswordEncrypted: instance.pgPassword.newPassword
+            ? await encryptPassword(instance.pgPassword.newPassword)
+            : undefined,
+        },
+      });
     }),
 
   clickhouseStatus: procedure.query(async () => {

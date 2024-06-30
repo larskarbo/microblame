@@ -1,0 +1,62 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  email     String?  @unique
+  name      String?
+  Team      Team     @relation(fields: [teamId], references: [id])
+  teamId    Int
+
+  @@index([email])
+}
+
+model Team {
+  id        Int       @id @default(autoincrement())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  name      String    @unique
+  Members   User[]
+  Projects  Project[]
+}
+
+model Project {
+  id          Int          @id @default(autoincrement())
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  name        String       @unique
+  Team        Team         @relation(fields: [teamId], references: [id])
+  teamId      Int
+  PgInstances PgInstance[]
+
+  @@index([name])
+}
+
+model PgInstance {
+  id        Int     @id @default(autoincrement())
+  uuid      String  @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  projectId Int
+  Project   Project @relation(fields: [projectId], references: [id])
+
+  name                String
+  pgUser              String
+  pgPasswordEncrypted String
+  pgHost              String
+  pgPort              Int
+  pgDatabase          String
+  ssl                 Boolean
+}
