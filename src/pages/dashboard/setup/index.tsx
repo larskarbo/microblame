@@ -8,38 +8,11 @@ import { isBrowser } from "../../../env";
 import { InlineCode } from "../../../components/InlineCode";
 import Link from "next/link";
 
-// const ExistingPostgresInstanceTester = ({
-//   instance,
-// }: {
-//   instance: "main" | "readonly";
-// }) => {
-//   const { data, mutate: testUri } =
-//     trpc.setup.testPostgresConnection.useMutation({});
-
-//   return (
-//     <div className="mb-2">
-//       <div className="flex gap-4 text-xs items-center">
-//         <div>{instance === "main" ? "Main" : "Readonly"} PG</div>
-//         <Button
-//           onClick={() =>
-//             testUri({
-//               instance: "main",
-//             })
-//           }
-//         >
-//           Test Connection
-//         </Button>
-//       </div>
-//       {data && <TestResultShower data={data} />}
-//     </div>
-//   );
-// };
-
 const SetupPage = () => {
   const { data: me } = trpc.me.useQuery();
 
   if (!me) {
-    return "Not authenticated";
+    return null;
   }
 
   const pgInstances = me!.Team!.Projects[0]!.PgInstances;

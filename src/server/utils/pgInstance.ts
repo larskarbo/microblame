@@ -3,6 +3,7 @@ import { prisma } from "../../db";
 import { LoggedInUser } from "../models/loggedInUser";
 import { ensureUserHasAccessToProject } from "./project";
 import { decryptPassword } from "./password";
+import { PgInstance } from "@prisma/client";
 
 export const getPostgresJsInstanceIfUserHasAccess = async ({
   instanceUuid,
@@ -27,7 +28,19 @@ export const getPostgresJsInstanceIfUserHasAccess = async ({
     projectId: instance.projectId,
   });
 
-  const postgresJsInstance = postgres({
+  const postgresJsInstance = await getPostgresJsInstance({
+    instance,
+  });
+
+  return postgresJsInstance;
+};
+
+export const getPostgresJsInstance = async ({
+  instance,
+}: {
+  instance: PgInstance;
+}) => {
+  return postgres({
     user: instance.pgUser,
     password: await decryptPassword(instance.pgPasswordEncrypted),
     host: instance.pgHost,
@@ -39,6 +52,4 @@ export const getPostgresJsInstanceIfUserHasAccess = async ({
         }
       : false,
   });
-
-  return postgresJsInstance;
 };

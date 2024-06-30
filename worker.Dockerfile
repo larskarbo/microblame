@@ -2,14 +2,21 @@ FROM imbios/bun-node:latest-20-slim AS base
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable
-COPY . /app
+
 WORKDIR /app
+COPY package.json pnpm-lock.yaml ./
 
-FROM base AS prod-deps
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --prod --frozen-lockfile
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 
+COPY prisma ./prisma
+COPY src ./src
+COPY public ./public
+COPY tsconfig.json ./
+COPY postcss.config.js ./
+COPY tailwind.config.js ./
+COPY scripts ./scripts
+COPY next-env.d.ts ./
 
-FROM base
-COPY --from=prod-deps /app/node_modules /app/node_modules
+RUN pnpx prisma generate
 
-ENTRYPOINT [ "bun", "run", "scripts/tracedQueriesGeneratorStart.ts" ]
+CMD [ "bun", "run", "scripts/tracedQueriesGeneratorStart.ts" ]

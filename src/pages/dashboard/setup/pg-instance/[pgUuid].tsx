@@ -49,7 +49,7 @@ const SetupPage = () => {
   console.log("pgUuid: ", pgUuid);
 
   if (!me) {
-    return "Not authenticated";
+    return null;
   }
 
   if (!pgUuid) {

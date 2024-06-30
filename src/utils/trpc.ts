@@ -1,6 +1,9 @@
 import { httpLink } from "@trpc/client";
 import { createTRPCNext } from "@trpc/next";
 import type { AppRouter } from "../server/routers/router";
+import { isDev } from "../env";
+import { getErrorMessage } from "../components/utils";
+import toast from "react-hot-toast";
 
 function getBaseUrl() {
   if (typeof window !== "undefined")
@@ -38,6 +41,25 @@ export const trpc = createTRPCNext<AppRouter>({
           },
         }),
       ],
+      queryClientConfig: {
+        defaultOptions: {
+          queries: {
+            retry: false,
+            refetchOnMount: true,
+            refetchOnWindowFocus: isDev ? true : false,
+            refetchOnReconnect: isDev ? true : false,
+          },
+          mutations: {
+            retry: false,
+            onError: (e: unknown) => {
+              const errMsg = getErrorMessage(e);
+              /* eslint-disable no-console */
+              console.error(e);
+              toast.error(errMsg);
+            },
+          },
+        },
+      },
     };
   },
   /**

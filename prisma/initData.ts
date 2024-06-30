@@ -1,9 +1,37 @@
 import { PrismaClient } from "@prisma/client";
+import { writeFileSync, existsSync } from "fs";
+import { randomBytes } from "crypto";
+import { getEnv } from "@larskarbo/get-env";
 
 const prisma = new PrismaClient();
 
 async function main() {
   console.log(`Start seeding with initial data...`);
+
+  const passwordEncryptionSecretFile = getEnv(
+    "PASSWORD_ENCRYPTION_SECRET_FILE"
+  );
+
+  const alreadyExists = existsSync(passwordEncryptionSecretFile);
+
+  if (alreadyExists) {
+    console.log(
+      `Encryption key already exists at ${passwordEncryptionSecretFile}`
+    );
+  } else {
+    try {
+      writeFileSync(
+        passwordEncryptionSecretFile,
+        randomBytes(32).toString("hex")
+      );
+      console.log(
+        `Generated encryption key and saved to ${passwordEncryptionSecretFile}`
+      );
+    } catch (error) {
+      console.error("Failed to create encryption key file:", error);
+      throw error;
+    }
+  }
 
   const user1 = await prisma.user.findUnique({
     where: {

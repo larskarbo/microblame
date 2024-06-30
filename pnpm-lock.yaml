@@ -86,6 +86,9 @@ dependencies:
   postgres:
     specifier: ^3.4.4
     version: 3.4.4
+  prisma:
+    specifier: ^5.15.0
+    version: 5.15.0
   prismjs:
     specifier: ^1.29.0
     version: 1.29.0
@@ -130,9 +133,6 @@ devDependencies:
   '@types/react':
     specifier: ^17.0.38
     version: 17.0.80
-  prisma:
-    specifier: ^5.15.0
-    version: 5.15.0
   ts-node:
     specifier: ^10.9.2
     version: 10.9.2(@types/node@20.12.2)(typescript@4.9.5)
@@ -715,9 +715,11 @@ packages:
 
   /@prisma/debug@5.15.0:
     resolution: {integrity: sha512-QpEAOjieLPc/4sMny/WrWqtpIAmBYsgqwWlWwIctqZO0AbhQ9QcT6x2Ut3ojbDo/pFRCCA1Z1+xm2MUy7fAkZA==}
+    dev: false
 
   /@prisma/engines-version@5.15.0-29.12e25d8d06f6ea5a0252864dd9a03b1bb51f3022:
     resolution: {integrity: sha512-3BEgZ41Qb4oWHz9kZNofToRvNeS4LZYaT9pienR1gWkjhky6t6K1NyeWNBkqSj2llgraUNbgMOCQPY4f7Qp5wA==}
+    dev: false
 
   /@prisma/engines@5.15.0:
     resolution: {integrity: sha512-hXL5Sn9hh/ZpRKWiyPA5GbvF3laqBHKt6Vo70hYqqOhh5e0ZXDzHcdmxNvOefEFeqxra2DMz2hNbFoPvqrVe1w==}
@@ -727,6 +729,7 @@ packages:
       '@prisma/engines-version': 5.15.0-29.12e25d8d06f6ea5a0252864dd9a03b1bb51f3022
       '@prisma/fetch-engine': 5.15.0
       '@prisma/get-platform': 5.15.0
+    dev: false
 
   /@prisma/fetch-engine@5.15.0:
     resolution: {integrity: sha512-z6AY5yyXxc20Klj7wwnfGP0iIUkVKzybqapT02zLYR/nf9ynaeN8bq73WRmi1TkLYn+DJ5Qy+JGu7hBf1pE78A==}
@@ -734,11 +737,13 @@ packages:
       '@prisma/debug': 5.15.0
       '@prisma/engines-version': 5.15.0-29.12e25d8d06f6ea5a0252864dd9a03b1bb51f3022
       '@prisma/get-platform': 5.15.0
+    dev: false
 
   /@prisma/get-platform@5.15.0:
     resolution: {integrity: sha512-1GULDkW4+/VQb73vihxCBSc4Chc2x88MA+O40tcZFjmBzG4/fF44PaXFxUqKSFltxU9L9GIMLhh0Gfkk/pUbtg==}
     dependencies:
       '@prisma/debug': 5.15.0
+    dev: false
 
   /@radix-ui/react-compose-refs@1.1.0(@types/react@17.0.80)(react@18.3.1):
     resolution: {integrity: sha512-b4inOtiaOnYf9KWyO3jAeeCG6FeyfY6ldiEPanbUjWd+xIk5wZeHa8yVwmrJ2vderhu/BQvzCrJI0lHd+wIiqw==}
@@ -2532,6 +2537,7 @@ packages:
     requiresBuild: true
     dependencies:
       '@prisma/engines': 5.15.0
+    dev: false
 
   /prismjs@1.29.0:
     resolution: {integrity: sha512-Kx/1w86q/epKcmte75LNrEoT+lX8pBpavuAbvJWRXar7Hz8jrtF+e3vY751p0R8H9HdArwaCTNDDzHg/ScJK1Q==}

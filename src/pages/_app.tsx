@@ -4,19 +4,11 @@ import "prismjs/themes/prism-tomorrow.css";
 import "typeface-merriweather";
 import "../global.css";
 import { trpc } from "../utils/trpc";
-import toast, { Toaster } from "react-hot-toast";
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: false,
-    },
-  },
-});
+import { Toaster } from "react-hot-toast";
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
-    <QueryClientProvider client={queryClient}>
+    <>
       <Component {...pageProps} />
 
       <Toaster
@@ -27,7 +19,7 @@ function MyApp({ Component, pageProps }: AppProps) {
           },
         }}
       />
-    </QueryClientProvider>
+    </>
   );
 }
 

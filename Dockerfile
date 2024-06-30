@@ -6,12 +6,12 @@ RUN corepack enable
 RUN apt-get update -y
 RUN apt-get install -y openssl
 
-
 WORKDIR /app
 COPY package.json pnpm-lock.yaml ./
 
 FROM base AS build
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
+
 COPY prisma ./prisma
 COPY src ./src
 COPY public ./public
@@ -20,6 +20,7 @@ COPY postcss.config.js ./
 COPY tailwind.config.js ./
 COPY scripts ./scripts
 COPY next-env.d.ts ./
+
 RUN pnpx prisma generate
 RUN pnpm run build
 

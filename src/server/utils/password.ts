@@ -1,18 +1,30 @@
-import { createCipheriv, createDecipheriv, randomBytes } from "crypto";
 import { getEnv } from "@larskarbo/get-env";
+import { createCipheriv, createDecipheriv, randomBytes } from "crypto";
+import { readFileSync } from "fs";
 
 export const getEncryptionKey = () => {
-  const passwordEncryptionSecret = getEnv("PASSWORD_ENCRYPTION_SECRET");
-  const key = Buffer.from(passwordEncryptionSecret, "hex");
-  if (key.length !== 32) {
-    console.error("Encryption key must be 32 bytes (256 bits).");
-    throw new Error("Encryption key must be 32 bytes (256 bits).");
+  const passwordEncryptionSecretFile = getEnv(
+    "PASSWORD_ENCRYPTION_SECRET_FILE"
+  );
+
+  try {
+    const passwordEncryptionSecret = readFileSync(
+      passwordEncryptionSecretFile,
+      "utf8"
+    ).trim();
+    const key = Buffer.from(passwordEncryptionSecret, "hex");
+    if (key.length !== 32) {
+      console.error("Encryption key must be 32 bytes (256 bits).");
+      throw new Error("Encryption key must be 32 bytes (256 bits).");
+    }
+    return key;
+  } catch (error) {
+    console.error("Failed to read encryption key from file:", error);
+    throw error;
   }
-  return key;
 };
 
 export const encryptPassword = async (password: string) => {
-  console.log("password: ", password);
   if (password === "") {
     return "";
   }
