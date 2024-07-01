@@ -51,6 +51,7 @@ export const getPostgresJsInstance = async ({
           rejectUnauthorized: false,
         }
       : false,
+    max: 1,
     idle_timeout: 20, // 20 seconds
     max_lifetime: 60 * 2, // 2 minutes
     connection: {

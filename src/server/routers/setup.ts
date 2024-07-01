@@ -87,6 +87,12 @@ export const setupRouter = router({
               rejectUnauthorized: false,
             }
           : false,
+        max: 1,
+        idle_timeout: 20, // 20 seconds
+        max_lifetime: 60 * 2, // 2 minutes
+        connection: {
+          application_name: "postgresjs-microblame-test",
+        },
       });
 
       const canSelect1 = await postgresJsInstance`
@@ -98,7 +104,8 @@ export const setupRouter = router({
             errorMessage: null,
           };
         })
-        .catch((err: Error) => {
+        .catch(async (err: Error) => {
+          await postgresJsInstance.end();
           return {
             status: "error",
             errorMessage: err.message,
@@ -114,12 +121,15 @@ export const setupRouter = router({
             errorMessage: null,
           };
         })
-        .catch((err) => {
+        .catch(async (err) => {
+          await postgresJsInstance.end();
           return {
             status: "error",
             errorMessage: err.message,
           };
         });
+
+      await postgresJsInstance.end();
 
       return {
         success: true,
