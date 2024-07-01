@@ -72,18 +72,18 @@ services:
     command: bun run scripts/tracedQueriesGeneratorStart.ts
     restart: on-failure
 
-  connection-worker:
-    depends_on:
-      clickhouse:
-        condition: service_healthy
-    build:
-      dockerfile: ./worker.Dockerfile
-    environment:
-      - CLICKHOUSE_URI=http://clickhouse:8123
-      - REDIS_URL=redis://redis:6379
-      - DATABASE_URL=postgres://user:password@app-db:5432/microblame
-      - PASSWORD_ENCRYPTION_SECRET_FILE=/run/secrets/password_encryption_secret
-    volumes:
-      - ./secrets:/run/secrets
-    command: bun run src/utils/connection-worker/connectionWorker.ts
-    restart: on-failure
+  # connection-worker:
+  #   depends_on:
+  #     clickhouse:
+  #       condition: service_healthy
+  #   build:
+  #     dockerfile: ./worker.Dockerfile
+  #   environment:
+  #     - CLICKHOUSE_URI=http://clickhouse:8123
+  #     - REDIS_URL=redis://redis:6379
+  #     - DATABASE_URL=postgres://user:password@app-db:5432/microblame
+  #     - PASSWORD_ENCRYPTION_SECRET_FILE=/run/secrets/password_encryption_secret
+  #   volumes:
+  #     - ./secrets:/run/secrets
+  #   command: bun run src/utils/connection-worker/connectionWorker.ts
+  #   restart: on-failure
