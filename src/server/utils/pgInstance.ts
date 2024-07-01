@@ -51,5 +51,10 @@ export const getPostgresJsInstance = async ({
           rejectUnauthorized: false,
         }
       : false,
+    idle_timeout: 20, // 20 seconds
+    max_lifetime: 60 * 2, // 2 minutes
+    connection: {
+      application_name: "postgresjs-microblame",
+    },
   });
 };
