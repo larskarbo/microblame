@@ -58,6 +58,8 @@ services:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
       POSTGRES_DB: microblame
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
     restart: on-failure
 
   worker:
