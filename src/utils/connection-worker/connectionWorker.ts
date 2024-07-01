@@ -2,9 +2,9 @@ import { prisma } from "../../db";
 import { getPostgresJsInstance } from "../../server/utils/pgInstance";
 import { createPgStatActivitySnapshotTableIfNotExists } from "./createPgStatActivitySnapshotTable";
 import { clickhouseClient } from "../insight/clickhouse";
-import postgres from "postgres";
 
 const start = async () => {
+  return;
   console.log(`Starting pg_stat_activity snapshot worker`);
 
   await createPgStatActivitySnapshotTableIfNotExists();
