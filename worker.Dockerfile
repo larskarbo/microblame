@@ -18,5 +18,3 @@ COPY scripts ./scripts
 COPY next-env.d.ts ./
 
 RUN pnpx prisma generate
-
-CMD [ "bun", "run", "scripts/tracedQueriesGeneratorStart.ts" ]

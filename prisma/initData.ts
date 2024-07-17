@@ -2,11 +2,14 @@ import { PrismaClient } from "@prisma/client";
 import { writeFileSync, existsSync } from "fs";
 import { randomBytes } from "crypto";
 import { getEnv } from "@larskarbo/get-env";
+import { initAndMigrateClickhouse } from "./initAndMigrateClickhouse";
 
 const prisma = new PrismaClient();
 
 async function main() {
   console.log(`Start seeding with initial data...`);
+
+	await initAndMigrateClickhouse();
 
   const passwordEncryptionSecretFile = getEnv(
     "PASSWORD_ENCRYPTION_SECRET_FILE"

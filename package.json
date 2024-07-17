@@ -7,7 +7,8 @@
     "start": "next start",
     "start-worker-pm2": "pm2 start --interpreter bun scripts/tracedQueriesGeneratorStart.ts",
     "postinstall": "npx prisma generate",
-    "start_with_data_init": "npx prisma migrate deploy && npx ts-node -T prisma/initData.ts && npm run start"
+    "start-with-data-init": "npx prisma migrate deploy && npx ts-node -T prisma/initData.ts && npm run start",
+    "data-init": "npx prisma migrate deploy && npx ts-node -T prisma/initData.ts"
   },
   "version": "0.1.0",
   "dependencies": {
@@ -38,18 +39,19 @@
     "next-auth": "^4.24.7",
     "pm2": "^5.3.1",
     "postgres": "^3.4.4",
+    "prisma": "^5.15.0",
     "prismjs": "^1.29.0",
     "react": "^18.3.1",
     "react-dom": "18.3.1",
     "react-hook-form": "^7.52.0",
     "react-hot-toast": "^2.4.1",
+    "superjson": "^2.2.1",
     "tailwind-merge": "^2.3.0",
     "tailwindcss": "^3.0.12",
     "tailwindcss-animate": "^1.0.7",
     "typeface-merriweather": "^1.1.13",
     "vitest": "^0.33.0",
-    "zod": "^3.22.4",
-    "prisma": "^5.15.0"
+    "zod": "^3.22.4"
   },
   "devDependencies": {
     "@types/lodash": "^4.14.195",

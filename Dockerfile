@@ -27,4 +27,4 @@ RUN pnpm run build
 FROM base
 COPY --from=build /app /app
 EXPOSE 3000
-CMD [ "pnpm", "start_with_data_init" ]
+CMD [ "pnpm", "start-with-data-init" ]

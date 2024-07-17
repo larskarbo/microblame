@@ -1,5 +1,6 @@
 import { initTRPC } from "@trpc/server";
 import { Context } from "./context";
+import superjson from "superjson";
 
 const t = initTRPC.context<Context>().create({
   errorFormatter({ error, shape }) {
@@ -13,6 +14,7 @@ const t = initTRPC.context<Context>().create({
 
     return shape;
   },
+  transformer: superjson,
 });
 
 // Base router and procedure helpers
