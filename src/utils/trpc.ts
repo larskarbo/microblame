@@ -4,6 +4,7 @@ import type { AppRouter } from "../server/routers/router";
 import { isDev } from "../env";
 import { getErrorMessage } from "../components/utils";
 import toast from "react-hot-toast";
+import superjson from "superjson";
 
 function getBaseUrl() {
   if (typeof window !== "undefined")
@@ -60,6 +61,7 @@ export const trpc = createTRPCNext<AppRouter>({
           },
         },
       },
+      transformer: superjson,
     };
   },
   /**

@@ -5,6 +5,7 @@ import Layout from "../../components/layout/Layout";
 import { QueryRow } from "../../components/QueryRow";
 import { Spinner } from "../../components/Spinner";
 import { trpc } from "../../utils/trpc";
+import { formatDistanceToNow } from "date-fns";
 
 export const Project = () => {
   const [instanceUuid, setInstanceUuid] = useState<string | null>(null);
@@ -42,6 +43,7 @@ export const Project = () => {
     });
 
   const queries = data?.queries;
+  const lastReset = data?.lastReset;
 
   const pgInstances = me?.Team?.Projects[0]?.PgInstances;
 
@@ -62,32 +64,43 @@ export const Project = () => {
               ))}
             </select>
           </div>
-          <div className="flex gap-4 mb-8">
-            <Button
-              onClick={() => {
-                if (!instanceUuid) {
-                  return;
-                }
-
-                void resetPgStats({
-                  instanceUuid: instanceUuid,
-                });
-              }}
-              className="border hover:bg-gray-100 text-gray-900 px-4 py-2 rounded-md text-xs disabled:opacity-50"
-              disabled={isResettingPgStats}
-            >
-              {isResettingPgStats ? "Resetting..." : "Reset pg stats"}
-            </Button>
-            <Button
-              onClick={() => {
-                void refetch();
-              }}
-              className="border hover:bg-gray-100 text-gray-900 px-4 py-2 rounded-md text-xs disabled:opacity-50"
-              disabled={isFetching || isResettingPgStats}
-            >
-              Refresh
-              {isFetching && "ing..."}
-            </Button>
+          <div className="mb-8">
+            <div className="flex gap-4">
+              <div>
+                <Button
+                  onClick={() => {
+                    if (!instanceUuid) {
+                      return;
+                    }
+                    void resetPgStats({
+                      instanceUuid: instanceUuid,
+                    });
+                  }}
+                  className="border hover:bg-gray-100 text-gray-900 px-4 py-2 rounded-md text-xs disabled:opacity-50"
+                  disabled={isResettingPgStats}
+                >
+                  {isResettingPgStats ? "Resetting..." : "Reset pg stats"}
+                </Button>
+              </div>
+              <Button
+                onClick={() => {
+                  void refetch();
+                }}
+                className="border hover:bg-gray-100 text-gray-900 px-4 py-2 rounded-md text-xs disabled:opacity-50"
+                disabled={isFetching || isResettingPgStats}
+              >
+                Refresh
+                {isFetching && "ing..."}
+              </Button>
+            </div>
+            {lastReset && (
+              <div className="text-xxs text-gray-500 mt-1">
+                Last reset:{" "}
+                {formatDistanceToNow(new Date(lastReset), {
+                  addSuffix: true,
+                })}
+              </div>
+            )}
           </div>
 
           {isLoading ? (
@@ -113,7 +126,7 @@ export const Project = () => {
                       Total duration
                     </th>
                     <th className="py-2 pr-2 font-normal text-xxs whitespace-nowrap">
-                      Requests
+                      Calls
                     </th>
                     <th className="py-2 pr-2 font-normal text-xxs whitespace-nowrap ">
                       Prisma

@@ -11,6 +11,7 @@ export type PgRow = {
   mean_exec_time: number;
   stddev_exec_time: number;
   percentageOfLoad: number;
+  timestamp: Date;
 };
 
 export const getTopPgQueries = async (
@@ -54,12 +55,15 @@ export const getTopPgQueries = async (
     resultPromise,
   ]);
 
-  return result.map((row) => {
+  const pgRows: PgRow[] = result.map((row) => {
     return {
       ...row,
       percentageOfLoad: round((row.total_exec_time / totalExecTime) * 100, 2),
+      timestamp: new Date(),
     };
   });
+
+  return pgRows;
 };
 
 export const getTotalExecTime = async (postgres: postgres.Sql<{}>) => {

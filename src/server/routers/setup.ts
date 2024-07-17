@@ -205,6 +205,31 @@ export const setupRouter = router({
       });
     }),
 
+  deletePgInstance: procedure
+    .input(z.object({ uuid: z.string() }))
+    .mutation(async ({ input, ctx }) => {
+      const { uuid } = input;
+      const { user } = ctx;
+
+      const pgInstance = await prisma.pgInstance.findUniqueOrThrow({
+        where: {
+          uuid,
+        },
+      });
+
+      await ensureUserHasAccessToProject({
+        prisma,
+        user,
+        projectId: pgInstance.projectId,
+      });
+
+      return await prisma.pgInstance.delete({
+        where: {
+          uuid,
+        },
+      });
+    }),
+
   clickhouseStatus: procedure.query(async () => {
     const simpleQuery = `
 			SELECT 1;

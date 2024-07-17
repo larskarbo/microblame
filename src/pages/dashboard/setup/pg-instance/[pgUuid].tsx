@@ -103,8 +103,21 @@ const NewPostgresInstanceForm = ({ pgUuid }: { pgUuid: string }) => {
         router.push("/dashboard/setup");
       },
     });
+
   const { mutate: updatePgInstance, isLoading: isUpdatingPgInstance } =
-    trpc.setup.updatePgInstance.useMutation();
+    trpc.setup.updatePgInstance.useMutation({
+      onSuccess: () => {
+        router.push("/dashboard/setup");
+      },
+    });
+
+  const { mutate: deletePgInstance, isLoading: isDeletingPgInstance } =
+    trpc.setup.deletePgInstance.useMutation({
+      onSuccess: () => {
+        router.push("/dashboard/setup");
+      },
+    });
+
   const {
     data: testResult,
     mutate: testPgConnection,
@@ -326,17 +339,34 @@ const NewPostgresInstanceForm = ({ pgUuid }: { pgUuid: string }) => {
 
       <div className="flex space-x-4 mt-8">
         {pgInstance ? (
-          <Button
-            onClick={() => {
-              updatePgInstance({
-                instance: workingPginstace,
-                uuid: pgInstance.uuid,
-              });
-            }}
-            isLoading={isUpdatingPgInstance}
-          >
-            Update instance
-          </Button>
+          <>
+            <Button
+              onClick={() => {
+                updatePgInstance({
+                  instance: workingPginstace,
+                  uuid: pgInstance.uuid,
+                });
+              }}
+              isLoading={isUpdatingPgInstance}
+            >
+              Update instance
+            </Button>
+            <Button
+              onClick={() => {
+                const confirm = window.confirm(
+                  "Are you sure you want to delete this instance?"
+                );
+                if (confirm) {
+                  deletePgInstance({
+                    uuid: pgInstance.uuid,
+                  });
+                }
+              }}
+              isLoading={isDeletingPgInstance}
+            >
+              Delete instance
+            </Button>
+          </>
         ) : (
           <Button
             onClick={() => {

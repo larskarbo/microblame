@@ -5,8 +5,15 @@ import { useState } from "react";
 import { trpc } from "../utils/trpc";
 import { Code } from "./Code";
 import { PgRow } from "../utils/insight/pgStatQueries";
+import { SnapshottedQuery } from "../server/snapshot/snapshottedQuery";
 
-export const QueryRow = ({ pgRow: pgRow }: { pgRow: PgRow }) => {
+export const QueryRow = ({
+  pgRow: pgRow,
+}: {
+  pgRow: PgRow & {
+    lastSnapshottedQuery?: SnapshottedQuery;
+  };
+}) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const { data, isLoading, isError } = trpc.insight.getTracedQuery.useQuery(
@@ -22,6 +29,20 @@ export const QueryRow = ({ pgRow: pgRow }: { pgRow: PgRow }) => {
   );
   const tracedQueryWithStats = data?.tracedQueryWithStats;
   const sampleTracedQuery = data?.sampleTracedQuery;
+
+  let callsPerMinute = null;
+
+  if (pgRow.lastSnapshottedQuery) {
+    const lastSnapshottedQuery = pgRow.lastSnapshottedQuery;
+    const lastSnapshottedQueryTimestamp = new Date(
+      lastSnapshottedQuery.timestamp
+    ).getTime();
+    console.log("pgRow.timestamp: ", pgRow);
+    const queryTimestamp = pgRow.timestamp.getTime();
+    const timeDiff = queryTimestamp - lastSnapshottedQueryTimestamp;
+    const callsDiff = pgRow.calls - lastSnapshottedQuery.calls;
+    callsPerMinute = (callsDiff / (timeDiff / 1000)) * 60;
+  }
 
   return (
     <>
@@ -54,7 +75,12 @@ export const QueryRow = ({ pgRow: pgRow }: { pgRow: PgRow }) => {
           {pgRow.total_exec_time ? round(pgRow.total_exec_time) : null}s (
           {pgRow.percentageOfLoad}%)
         </td>
-        <td className="pr-2 whitespace-nowrap">{pgRow.calls} calls</td>
+        <td className="pr-2 whitespace-nowrap">
+          <>{pgRow.calls} </>{" "}
+          {callsPerMinute !== null ? (
+            <> ({round(callsPerMinute, 0)} calls/min)</>
+          ) : null}
+        </td>
         <td className="pr-2">
           {isError ? (
             <div className="text-red-500">Error</div>

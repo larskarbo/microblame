@@ -10,6 +10,14 @@ import { getTracedQueryWithStats } from "../../utils/insight/tracedQueryWithStat
 import { removeComments } from "../../utils/insight/utils";
 import { procedure, router } from "../trpc";
 import { getPostgresJsInstanceIfUserHasAccess } from "../utils/pgInstance";
+import { getErrorMessage } from "../../components/utils";
+import { TRPCError } from "@trpc/server";
+import { savePgQuerySnapshot } from "../snapshot/savePgQuerySnapshot";
+import {
+  clickhouseClient,
+  clickhouseQuery,
+} from "../../utils/insight/clickhouse";
+import { SnapshottedQuery } from "../snapshot/snapshottedQuery";
 
 export const insightRouter = router({
   getQueries: procedure
@@ -30,8 +38,42 @@ export const insightRouter = router({
         order: "total_exec_time",
         postgresJsInstance,
       });
+
+      const queriesWithLastSnapshottedQuery = await Promise.all(
+        queries.map(async (query) => {
+          const lastSnapshottedQuery = await clickhouseQuery<SnapshottedQuery>(`
+						SELECT * from pg_stat_statements_snapshots
+						WHERE queryid = '${query.queryid}'
+						and pgInstanceUuid = '${input.instanceUuid}'
+						ORDER BY timestamp DESC
+						LIMIT 1
+						`);
+
+          return {
+            ...query,
+            lastSnapshottedQuery: lastSnapshottedQuery[0],
+          };
+        })
+      );
+
+      const lastResetRaw = await postgresJsInstance<
+        {
+          stats_reset: string;
+        }[]
+      >`
+				SELECT * FROM public.pg_stat_statements_info();
+				`;
+
+      const lastReset = lastResetRaw[0]?.stats_reset;
+
+      await savePgQuerySnapshot({
+        pgRows: queries,
+        pgInstanceUuid: input.instanceUuid,
+      });
+
       return {
-        queries,
+        queries: queriesWithLastSnapshottedQuery,
+        lastReset: lastReset ? new Date(lastReset) : null,
       };
     }),
 
@@ -48,13 +90,27 @@ export const insightRouter = router({
         user,
       });
 
-      await postgresJsInstance`
-				select pg_stat_statements_reset();
-			`;
-
-      return {
-        success: true,
-      };
+      try {
+        await postgresJsInstance`
+					select pg_stat_statements_reset();
+				`;
+        return {
+          success: true,
+        };
+      } catch (err) {
+        const message = getErrorMessage(err);
+        console.log("message: ", message);
+        if (
+          message === "permission denied for function pg_stat_statements_reset"
+        ) {
+          throw new TRPCError({
+            code: "UNAUTHORIZED",
+            message:
+              "Reset failed, make sure you have permission to call pg_stat_statements_reset()",
+          });
+        }
+        throw err;
+      }
     }),
 
   getTracedQuery: procedure
