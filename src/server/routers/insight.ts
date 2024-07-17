@@ -13,10 +13,7 @@ import { getPostgresJsInstanceIfUserHasAccess } from "../utils/pgInstance";
 import { getErrorMessage } from "../../components/utils";
 import { TRPCError } from "@trpc/server";
 import { savePgQuerySnapshot } from "../snapshot/savePgQuerySnapshot";
-import {
-  clickhouseClient,
-  clickhouseQuery,
-} from "../../utils/insight/clickhouse";
+import { clickhouseQuery } from "../../utils/insight/clickhouse";
 import { SnapshottedQuery } from "../snapshot/snapshottedQuery";
 
 export const insightRouter = router({
