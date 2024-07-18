@@ -42,8 +42,8 @@ export const insightRouter = router({
 						SELECT *, toUnixTimestamp64Milli(timestamp) as timestampUnix from pg_stat_statements_snapshots
 						WHERE queryid = '${query.queryid}'
 						and pgInstanceUuid = '${input.instanceUuid}'
+						and timestamp > now() - INTERVAL 1 HOUR
 						ORDER BY timestamp DESC
-						WHERE timestamp > now() - INTERVAL 1 HOUR
 						LIMIT 1
 						`);
 
