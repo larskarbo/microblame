@@ -39,7 +39,7 @@ export const insightRouter = router({
       const queriesWithLastSnapshottedQuery = await Promise.all(
         queries.map(async (query) => {
           const lastSnapshottedQuery = await clickhouseQuery<SnapshottedQuery>(`
-						SELECT * from pg_stat_statements_snapshots
+						SELECT *, toUnixTimestamp64Milli(timestamp) as timestampUnix from pg_stat_statements_snapshots
 						WHERE queryid = '${query.queryid}'
 						and pgInstanceUuid = '${input.instanceUuid}'
 						ORDER BY timestamp DESC

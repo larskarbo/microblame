@@ -12,7 +12,6 @@ export const savePgQuerySnapshot = async ({
     table: "pg_stat_statements_snapshots",
     values: pgRows.map((row) => ({
       ...row,
-      timestamp: new Date(),
       pgInstanceUuid,
     })),
     format: "JSONEachRow",

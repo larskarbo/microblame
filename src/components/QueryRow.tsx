@@ -35,7 +35,7 @@ export const QueryRow = ({
   if (pgRow.lastSnapshottedQuery) {
     const lastSnapshottedQuery = pgRow.lastSnapshottedQuery;
     const lastSnapshottedQueryTimestamp = new Date(
-      lastSnapshottedQuery.timestamp
+      parseInt(lastSnapshottedQuery.timestampUnix)
     ).getTime();
     console.log("pgRow.timestamp: ", pgRow);
     const queryTimestamp = pgRow.timestamp.getTime();

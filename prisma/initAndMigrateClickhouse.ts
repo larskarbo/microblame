@@ -23,12 +23,11 @@ export const initAndMigrateClickhouse = async () => {
 			mean_exec_time Float64,
 			stddev_exec_time Float64,
 			percentageOfLoad Float64,
-			timestamp Timestamp,
+			timestamp DateTime64,
 			pgInstanceUuid String
 		) ENGINE = MergeTree()
 		ORDER BY
 			(timestamp, queryid)
-		TTL timestamp + INTERVAL 1 DAY;
 		`,
   });
 };
