@@ -41,7 +41,7 @@ export const insightRouter = router({
           const lastSnapshottedQuery = await clickhouseQuery<SnapshottedQuery>(`
 						SELECT *, toUnixTimestamp64Milli(timestamp) as timestampUnix from pg_stat_statements_snapshots
 						WHERE queryid = '${query.queryid}'
-						and pgInstanceUuid = '${input.instanceUuid}'
+						and instance_uuid = '${input.instanceUuid}'
 						and timestamp > now() - INTERVAL 1 HOUR
 						ORDER BY timestamp DESC
 						LIMIT 1

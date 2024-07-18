@@ -4,19 +4,19 @@ import { createTracedQueriesTableIfNotExists } from "../src/utils/insight/create
 export const initAndMigrateClickhouse = async () => {
   await createTracedQueriesTableIfNotExists();
 
-  //   delete table if exists pg_stat_statements_snapshots
-  await clickhouseClient.query({
-    query: `
-  			DROP TABLE IF EXISTS pg_stat_statements_snapshots;
-  		`,
-  });
+//   //   delete table if exists pg_stat_statements_snapshots
+//   await clickhouseClient.query({
+//     query: `
+//   			DROP TABLE IF EXISTS pg_stat_statements_snapshots;
+//   		`,
+//   });
 
-  // delete table if exists pg_stat_activity_snapshot
-  await clickhouseClient.query({
-    query: `
-  			DROP TABLE IF EXISTS pg_stat_activity_snapshot;
-  		`,
-  });
+//   // delete table if exists pg_stat_activity_snapshot
+//   await clickhouseClient.query({
+//     query: `
+//   			DROP TABLE IF EXISTS pg_stat_activity_snapshot;
+//   		`,
+//   });
 
   await clickhouseClient.query({
     query: `
