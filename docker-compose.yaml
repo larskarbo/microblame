@@ -10,6 +10,8 @@ services:
       timeout: 10s
       retries: 3
     restart: on-failure
+    ports:
+      - "8123:8123"
 
   redis:
     image: redis:7.2.4
