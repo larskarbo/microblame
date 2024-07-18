@@ -34,7 +34,7 @@ const SetupPage = () => {
                     passHref
                     key={pgInstance.id}
                   >
-                    <Button>Edit</Button>
+                    <Button>Edit Connection Details</Button>
                   </Link>
                 </div>
               ))}

@@ -1,7 +1,7 @@
 import {
+	ArrowLeftEndOnRectangleIcon,
   ChartBarSquareIcon,
   CommandLineIcon,
-  ArrowLeftEndOnRectangleIcon,
 } from "@heroicons/react/24/outline";
 import clsx from "clsx";
 import { useRouter } from "next/router";
@@ -15,13 +15,16 @@ const navigation = [
     name: "Top Postgres Queries",
     href: "/dashboard",
     icon: ChartBarSquareIcon,
-    current: true,
+  },
+  {
+    name: "Postgres Instances",
+    href: "/dashboard/instances",
+    icon: ChartBarSquareIcon,
   },
   // {
   //   name: "Postgres Connections",
   //   href: "/dashboard/connections",
   //   icon: ArrowLeftEndOnRectangleIcon,
-  //   current: true,
   // },
   {
     name: "Setup",

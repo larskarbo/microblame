@@ -1,9 +1,4 @@
-import { useEffect, useState } from "react";
-
-import { Button } from "../../components/Button";
 import Layout from "../../components/layout/Layout";
-import { QueryRow } from "../../components/QueryRow";
-import { Spinner } from "../../components/Spinner";
 import { trpc } from "../../utils/trpc";
 
 export const Project = () => {

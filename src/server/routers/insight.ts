@@ -43,6 +43,7 @@ export const insightRouter = router({
 						WHERE queryid = '${query.queryid}'
 						and pgInstanceUuid = '${input.instanceUuid}'
 						ORDER BY timestamp DESC
+						WHERE timestamp > now() - INTERVAL 1 HOUR
 						LIMIT 1
 						`);
 
