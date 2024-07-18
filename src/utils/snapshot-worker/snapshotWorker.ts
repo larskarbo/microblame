@@ -1,16 +1,13 @@
-import { createPgStatActivitySnapshotTableIfNotExists } from "./createPgStatActivitySnapshotTable";
 import { takeConnectionSnapshots } from "./connectionSnapshot";
 import { takeQuerySnapshots } from "./querySnapshot";
 
 const start = async () => {
   console.log(`Starting snapshot worker`);
 
-  await createPgStatActivitySnapshotTableIfNotExists();
-
   void takeConnectionSnapshots();
   void takeQuerySnapshots();
 
-	setInterval(() => {
+  setInterval(() => {
     void takeConnectionSnapshots();
   }, 60_000);
 

@@ -58,12 +58,14 @@ export const takeConnectionSnapshots = async () => {
 					query
 				FROM pg_stat_activity;
 			`;
-      await pg.end();
+			console.log(`Fetched ${snapshot.length} rows for instance ${instance.uuid}`);
+      void pg.end();
 
       console.log(
         `Inserting ${snapshot.length} rows for instance ${instance.uuid}`
       );
 
+			const snapshotTimestamp = new Date();
       await clickhouseClient.insert({
         table: "pg_stat_activity_snapshot",
         values: snapshot.map((row) => ({
@@ -73,7 +75,7 @@ export const takeConnectionSnapshots = async () => {
             row.wait_event_type !== null || row.wait_event !== null
               ? "true"
               : "false",
-          snapshot_time: new Date(),
+          timestamp: snapshotTimestamp,
         })),
         format: "JSONEachRow",
       });

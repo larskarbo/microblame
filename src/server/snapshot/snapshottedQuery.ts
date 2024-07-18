@@ -9,5 +9,5 @@ export type SnapshottedQuery = {
   stddev_exec_time: number;
   percentageOfLoad: number;
   timestampUnix: string;
-  pgInstanceUuid: string;
+  instance_uuid: string;
 };

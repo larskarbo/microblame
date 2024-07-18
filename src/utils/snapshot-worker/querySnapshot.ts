@@ -19,7 +19,7 @@ export const takeQuerySnapshots = async () => {
         postgresJsInstance,
       });
 
-			await postgresJsInstance.end();
+			void postgresJsInstance.end();
 
       await savePgQuerySnapshot({
         pgRows: queries,

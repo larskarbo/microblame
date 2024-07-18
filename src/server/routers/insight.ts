@@ -158,4 +158,38 @@ export const insightRouter = router({
         tracedQueryWithStats,
       };
     }),
+
+  getInstancesWithInsights: procedure.query(async ({ input, ctx }) => {
+    const { user } = ctx;
+
+    const pgInstances = user!.Team!.Projects[0]!.PgInstances;
+
+    return await Promise.all(
+      pgInstances.map(async (pgInstance) => {
+        const raws = await clickhouseQuery<{
+          timestampUnix: string;
+          count: string;
+        }>(`
+						SELECT toUnixTimestamp64Milli(timestamp) as timestampUnix, COUNT(*) AS count
+						FROM pg_stat_activity_snapshot
+						WHERE instance_uuid = '${pgInstance.uuid}'
+						and timestamp > now() - INTERVAL 4 HOUR
+						GROUP BY timestamp
+						ORDER BY timestamp DESC
+				`);
+
+        const connectionDataPoints = raws.map((raw) => {
+          return {
+            time: new Date(parseInt(raw.timestampUnix)),
+            count: parseInt(raw.count),
+          };
+        });
+
+        return {
+          instance: pgInstance,
+          connectionDataPoints,
+        };
+      })
+    );
+  }),
 });

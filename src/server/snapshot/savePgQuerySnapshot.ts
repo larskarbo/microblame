@@ -12,7 +12,7 @@ export const savePgQuerySnapshot = async ({
     table: "pg_stat_statements_snapshots",
     values: pgRows.map((row) => ({
       ...row,
-      pgInstanceUuid,
+      instance_uuid: pgInstanceUuid,
     })),
     format: "JSONEachRow",
     clickhouse_settings: {

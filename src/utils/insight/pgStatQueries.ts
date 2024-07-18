@@ -55,12 +55,13 @@ export const getTopPgQueries = async (
     resultPromise,
   ]);
 
+  const snapshotTimestamp = new Date();
   const pgRows: PgRow[] = result.map((row) => {
     return {
       ...row,
       calls: parseInt(row.calls),
       percentageOfLoad: round((row.total_exec_time / totalExecTime) * 100, 2),
-      timestamp: new Date(),
+      timestamp: snapshotTimestamp,
     };
   });
 
