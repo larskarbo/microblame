@@ -25,7 +25,7 @@ export const getTopPgQueries = async (
     {
       queryid: string;
       query: string;
-      calls: number;
+      calls: string;
       total_exec_time: number;
       min_exec_time: number;
       max_exec_time: number;
@@ -51,13 +51,15 @@ export const getTopPgQueries = async (
 	`;
 
   const [totalExecTime, result] = await Promise.all([
-    totalExecTimePromise,
+		totalExecTimePromise,
     resultPromise,
   ]);
+	console.log("result: ", result);
 
   const pgRows: PgRow[] = result.map((row) => {
     return {
       ...row,
+			calls: parseInt(row.calls),
       percentageOfLoad: round((row.total_exec_time / totalExecTime) * 100, 2),
       timestamp: new Date(),
     };

@@ -41,6 +41,11 @@ export const QueryRow = ({
     const queryTimestamp = pgRow.timestamp.getTime();
     const timeDiff = queryTimestamp - lastSnapshottedQueryTimestamp;
     const callsDiff = pgRow.calls - lastSnapshottedQuery.calls;
+    console.log("callsDiff: ", {
+      callsDiff,
+      pgRowCalls: pgRow.calls,
+      lastSnapshottedQueryCalls: lastSnapshottedQuery.calls,
+    });
     callsPerMinute = (callsDiff / (timeDiff / 1000)) * 60;
   }
 
