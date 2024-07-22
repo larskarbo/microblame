@@ -46,9 +46,9 @@ services:
     ports:
       - 3004:3000
     environment:
-      - CLICKHOUSE_URI=http://clickhouse:8123
-      - REDIS_URL=redis://redis:6379
-      - DATABASE_URL=postgres://user:password@app-db:5432/microblame
+      - CLICKHOUSE_URI=${CLICKHOUSE_URI:-http://clickhouse:8123}
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379}
+      - DATABASE_URL=${DATABASE_URL:-postgres://user:password@app-db:5432/microblame}
       - PASSWORD_ENCRYPTION_SECRET_FILE=/run/secrets/password_encryption_secret
     volumes:
       - ./secrets:/run/secrets
