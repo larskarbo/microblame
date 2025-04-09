@@ -63,5 +63,6 @@
   },
   "prisma": {
     "seed": "bun run prisma/seed.ts"
-  }
+  },
+  "packageManager": "pnpm@10.4.1"
 }
