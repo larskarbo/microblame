@@ -1,14 +1,14 @@
-FROM imbios/bun-node:latest-20-slim AS base
+FROM imbios/bun-node:latest-22-slim AS base
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable
 
 WORKDIR /app
 COPY package.json pnpm-lock.yaml ./
+COPY prisma ./prisma
 
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 
-COPY prisma ./prisma
 COPY src ./src
 COPY public ./public
 COPY tsconfig.json ./

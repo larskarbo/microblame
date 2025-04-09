@@ -10,12 +10,13 @@ WORKDIR /app
 COPY package.json pnpm-lock.yaml ./
 
 FROM base AS build
+COPY prisma ./prisma
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 
-COPY prisma ./prisma
 COPY src ./src
 COPY public ./public
 COPY tsconfig.json ./
+COPY next.config.js ./
 COPY postcss.config.js ./
 COPY tailwind.config.js ./
 COPY scripts ./scripts
