@@ -40,7 +40,6 @@ async function main() {
               PgInstances: {
                 create: {
                   name: "Default PgInstance",
-                  // PG_READ_DATABASE_URI=postgresql://lars@localhost:5432/layer3
                   pgDatabase: "layer3",
                   pgHost: "localhost",
                   pgPasswordEncrypted: "",
