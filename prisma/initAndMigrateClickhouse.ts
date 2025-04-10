@@ -46,6 +46,7 @@ export const initAndMigrateClickhouse = async () => {
 	ORDER BY (instance_uuid, timestamp)
 	`,
   });
+  console.log("pg_stat_activity_snapshot created");
 
   await clickhouseClient.query({
     query: `
@@ -66,4 +67,5 @@ export const initAndMigrateClickhouse = async () => {
 			(timestamp, queryid)
 		`,
   });
+  console.log("pg_stat_statements_snapshots created");
 };

@@ -1,18 +1,17 @@
 // @ts-ignore
-import { createClient } from "@clickhouse/client-web";
-import type { createClient as createClientNodejs } from "@clickhouse/client";
+import { createClient } from "@clickhouse/client";
 import { getEnv } from "@larskarbo/get-env";
 import crypto from "node:crypto";
 // @ts-ignore
 globalThis.crypto ??= crypto.webcrypto;
 
 export const clickhouseClient = createClient({
-  host: getEnv("CLICKHOUSE_URI"),
+  url: getEnv("CLICKHOUSE_URI"),
   clickhouse_settings: {
     // Allows to insert serialized JS Dates (such as '2023-12-06T10:54:48.000Z')
     date_time_input_format: "best_effort",
   },
-}) as unknown as ReturnType<typeof createClientNodejs>;
+});
 
 interface Meta {
   name: string;

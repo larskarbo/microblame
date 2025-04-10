@@ -9,7 +9,7 @@ receivers:
             - "https://*"
 
 exporters:
- logging:
+ debug:
  clickhouse:
    endpoint: clickhouse://clickhouse:9000?dial_timeout=10s&compress=lz4
    database: default
@@ -32,4 +32,4 @@ service:
    traces:
      receivers: [otlp]
      processors: [batch]
-     exporters: [logging, clickhouse]
+     exporters: [debug, clickhouse]

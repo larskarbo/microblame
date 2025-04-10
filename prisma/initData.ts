@@ -1,6 +1,6 @@
 import { PrismaClient } from "@prisma/client";
-import { writeFileSync, existsSync } from "fs";
-import { randomBytes } from "crypto";
+import { writeFileSync, existsSync } from "node:fs";
+import { randomBytes } from "node:crypto";
 import { getEnv } from "@larskarbo/get-env";
 import { initAndMigrateClickhouse } from "./initAndMigrateClickhouse";
 

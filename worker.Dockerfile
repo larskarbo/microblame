@@ -1,4 +1,4 @@
-FROM imbios/bun-node:latest-22-slim AS base
+FROM imbios/bun-node:latest-20-slim AS base
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable
