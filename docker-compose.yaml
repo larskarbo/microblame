@@ -75,6 +75,7 @@ services:
       dockerfile: ./worker.Dockerfile
     environment:
       - CLICKHOUSE_URI=http://default:clickhouse_password@clickhouse:8123
+      - DATABASE_URL=postgres://user:password@app-db:5432/microblame
       - REDIS_URL=redis://redis:6379
     command: bun run scripts/tracedQueriesGeneratorStart.ts
     restart: on-failure
