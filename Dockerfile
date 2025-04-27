@@ -13,6 +13,7 @@ FROM base AS build
 COPY prisma ./prisma
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 
+COPY .env ./
 COPY src ./src
 COPY public ./public
 COPY tsconfig.json ./
