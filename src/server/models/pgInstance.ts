@@ -12,6 +12,7 @@ export const pgInstanceBaseSelect = createSelect<Prisma.PgInstanceSelect>()({
   id: true,
   name: true,
 	uuid: true,
+  teamId: true,
 });
 
 // type Payload = Prisma.PgInstanceGetPayload<{

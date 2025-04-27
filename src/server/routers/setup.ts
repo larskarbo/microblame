@@ -7,7 +7,7 @@ import { clickhouseQuery } from "../../utils/insight/clickhouse";
 import { requireAuth } from "../api/middleware";
 import { procedure, router } from "../trpc";
 import { decryptPassword, encryptPassword } from "../utils/password";
-import { ensureUserHasAccessToProject } from "../utils/project";
+import { ensureUserHasAccessToTeam } from "../utils/project";
 
 export const setupRouter = router({
   getPgInstance: procedure
@@ -15,7 +15,7 @@ export const setupRouter = router({
     .query(async ({ input, ctx }) => {
       const user = await requireAuth(ctx);
 
-      const pgInstance = await prisma.pgInstance.findUniqueOrThrow({
+      const pgInstance = await prisma.pgInstance.findUnique({
         where: {
           uuid: input.pgUuid,
         },
@@ -26,17 +26,18 @@ export const setupRouter = router({
           pgHost: true,
           pgPort: true,
           pgUser: true,
-          projectId: true,
+          teamId: true,
           ssl: true,
           uuid: true,
         },
       });
 
-      const isInUserProjects = user?.Team.Projects.some((project) => {
-        return project.PgInstances.some((pg) => pg.uuid === input.pgUuid);
-      });
+      if (!pgInstance) {
+        throw new Error("PgInstance not found");
+      }
 
-      if (!isInUserProjects) {
+      // Check if the user has access to this instance
+      if (user?.teamId !== pgInstance.teamId) {
         throw new Error("PgInstance not found");
       }
 
@@ -58,11 +59,8 @@ export const setupRouter = router({
           },
         });
 
-        const isInUserProjects = user?.Team.Projects.some((project) => {
-          return project.PgInstances.some((pg) => pg.uuid === uuid);
-        });
-
-        if (!isInUserProjects) {
+        // Check if the user has access to this instance
+        if (user?.teamId !== pgInstance.teamId) {
           throw new Error("PgInstance not found");
         }
 
@@ -142,17 +140,17 @@ export const setupRouter = router({
     .input(
       z.object({
         instance: pgInstanceSchema,
-        projectId: z.number(),
+        teamId: z.number(),
       })
     )
     .mutation(async ({ input, ctx }) => {
-      const { instance, projectId } = input;
+      const { instance, teamId } = input;
       const { user } = ctx;
 
-      await ensureUserHasAccessToProject({
+      await ensureUserHasAccessToTeam({
         prisma,
         user,
-        projectId,
+        teamId,
       });
 
       const password = instance.pgPassword.newPassword;
@@ -164,7 +162,7 @@ export const setupRouter = router({
         data: {
           ...omit(instance, ["pgPassword"]),
           pgPasswordEncrypted: await encryptPassword(password),
-          projectId: input.projectId,
+          teamId: input.teamId,
         },
       });
     }),
@@ -186,10 +184,10 @@ export const setupRouter = router({
         },
       });
 
-      await ensureUserHasAccessToProject({
+      await ensureUserHasAccessToTeam({
         prisma,
         user,
-        projectId: pgInstance.projectId,
+        teamId: pgInstance.teamId,
       });
 
       return await prisma.pgInstance.update({
@@ -217,10 +215,10 @@ export const setupRouter = router({
         },
       });
 
-      await ensureUserHasAccessToProject({
+      await ensureUserHasAccessToTeam({
         prisma,
         user,
-        projectId: pgInstance.projectId,
+        teamId: pgInstance.teamId,
       });
 
       return await prisma.pgInstance.delete({

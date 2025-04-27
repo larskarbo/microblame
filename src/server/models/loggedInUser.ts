@@ -10,12 +10,8 @@ export const loggedInUserSelect = createSelect<Prisma.UserSelect>()({
   teamId: true,
   Team: {
     include: {
-      Projects: {
-        include: {
-          PgInstances: {
-            select: pgInstanceBaseSelect,
-          },
-        },
+      PgInstances: {
+        select: pgInstanceBaseSelect,
       },
     },
   },

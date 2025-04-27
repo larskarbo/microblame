@@ -26,31 +26,19 @@ model User {
 }
 
 model Team {
-  id        Int       @id @default(autoincrement())
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  name      String    @unique
-  Members   User[]
-  Projects  Project[]
-}
-
-model Project {
   id          Int          @id @default(autoincrement())
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
   name        String       @unique
-  Team        Team         @relation(fields: [teamId], references: [id])
-  teamId      Int
+  Members     User[]
   PgInstances PgInstance[]
-
-  @@index([name])
 }
 
 model PgInstance {
   id        Int     @id @default(autoincrement())
   uuid      String  @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  projectId Int
-  Project   Project @relation(fields: [projectId], references: [id])
+  teamId    Int
+  Team      Team    @relation(fields: [teamId], references: [id])
 
   name                String
   pgUser              String

@@ -1,0 +1,6 @@
+- Don't use `as` assertions. Find types with `returnType`, or from `prisma` (import { Message } from "@/generated/prisma";) or elsewhere in the app.
+- Prefer functions over classes
+- Always "export const" instead of defining a component then "export default"
+- Don't use `any` as a type. Find the actual type.
+- Don't add/change prisma/migrations manually, use the prisma cli to generate them.
+- Don't run `npm run dev`, the project is already running.

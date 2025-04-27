@@ -34,20 +34,15 @@ async function main() {
       Team: {
         create: {
           name: "Default Team",
-          Projects: {
+          PgInstances: {
             create: {
-              name: "Default Project",
-              PgInstances: {
-                create: {
-                  name: "Default PgInstance",
-                  pgDatabase: "layer3",
-                  pgHost: "localhost",
-                  pgPasswordEncrypted: "",
-                  pgPort: 5432,
-                  pgUser: "lars",
-                  ssl: false,
-                },
-              },
+              name: "Default PgInstance",
+              pgDatabase: "layer3",
+              pgHost: "localhost",
+              pgPasswordEncrypted: "",
+              pgPort: 5432,
+              pgUser: "lars",
+              ssl: false,
             },
           },
         },

@@ -16,11 +16,11 @@ const navigation = [
     href: "/dashboard",
     icon: ChartBarSquareIcon,
   },
-  {
-    name: "Postgres Instances",
-    href: "/dashboard/instances",
-    icon: ChartBarSquareIcon,
-  },
+  // {
+  //   name: "Postgres Instances",
+  //   href: "/dashboard/instances",
+  //   icon: ChartBarSquareIcon,
+  // },
   // {
   //   name: "Postgres Connections",
   //   href: "/dashboard/connections",

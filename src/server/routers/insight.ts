@@ -162,7 +162,11 @@ export const insightRouter = router({
   getInstancesWithInsights: procedure.query(async ({ input, ctx }) => {
     const { user } = ctx;
 
-    const pgInstances = user!.Team!.Projects[0]!.PgInstances;
+    if (!user?.Team?.PgInstances?.length) {
+      return [];
+    }
+    
+    const pgInstances = user.Team.PgInstances;
 
     return await Promise.all(
       pgInstances.map(async (pgInstance) => {

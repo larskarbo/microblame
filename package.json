@@ -2,7 +2,7 @@
   "name": "web",
   "private": true,
   "scripts": {
-    "dev": "next dev --port 3006",
+    "dev": "next dev --port 3004",
     "build": "next build",
     "start": "next start",
     "type-check": "tsc",

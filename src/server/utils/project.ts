@@ -1,20 +1,16 @@
 import { PrismaClient } from "@prisma/client";
 import { LoggedInUser } from "../models/loggedInUser";
 
-export const ensureUserHasAccessToProject = async ({
+export const ensureUserHasAccessToTeam = async ({
   prisma,
   user,
-  projectId,
+  teamId,
 }: {
   prisma: PrismaClient;
   user?: LoggedInUser | null;
-  projectId: number;
+  teamId: number;
 }) => {
-  const project = user?.Team?.Projects.some((project) => {
-    return project.id === projectId;
-  });
-
-  if (!project) {
-    throw new Error("User is not part of project");
+  if (!user || user.teamId !== teamId) {
+    throw new Error("User is not part of team");
   }
 };

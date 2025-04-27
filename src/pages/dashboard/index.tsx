@@ -6,21 +6,20 @@ import { QueryRow } from "../../components/QueryRow";
 import { Spinner } from "../../components/Spinner";
 import { trpc } from "../../utils/trpc";
 import { formatDistanceToNow } from "date-fns";
+import { NoPgInstancesMessage } from "../../components/dashboard/NoPgInstancesMessage";
 
 export const Project = () => {
   const [instanceUuid, setInstanceUuid] = useState<string | null>(null);
-
   const { data: me } = trpc.me.useQuery();
-
+  
   useEffect(() => {
     if (instanceUuid === null) {
-      const firstInstance = me?.Team?.Projects[0]?.PgInstances[0];
-      console.log("firstInstance: ", firstInstance);
+      const firstInstance = me?.Team?.PgInstances[0];
       if (firstInstance) {
         setInstanceUuid(firstInstance.uuid);
       }
     }
-  }, [me?.Team?.Projects]);
+  }, [me?.Team?.PgInstances, instanceUuid]);
 
   const { data, error, isLoading, refetch, isFetching } =
     trpc.insight.getQueries.useQuery(
@@ -42,10 +41,22 @@ export const Project = () => {
       },
     });
 
+  // Check if the user has any database instances
+  if (me && me.Team.PgInstances.length === 0) {
+    return (
+      <Layout>
+        <div className="p-8">
+          <h1 className="mb-8 text-3xl font-extrabold">Dashboard</h1>
+          <NoPgInstancesMessage />
+        </div>
+      </Layout>
+    );
+  }
+
   const queries = data?.queries;
   const lastReset = data?.lastReset;
 
-  const pgInstances = me?.Team?.Projects[0]?.PgInstances;
+  const pgInstances = me?.Team?.PgInstances;
 
   return (
     <Layout>

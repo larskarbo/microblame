@@ -1,7 +1,7 @@
 import postgres from "postgres";
 import { prisma } from "../../db";
 import { LoggedInUser } from "../models/loggedInUser";
-import { ensureUserHasAccessToProject } from "./project";
+import { ensureUserHasAccessToTeam } from "./project";
 import { decryptPassword } from "./password";
 import { PgInstance } from "@prisma/client";
 
@@ -22,10 +22,10 @@ export const getPostgresJsInstanceIfUserHasAccess = async ({
     },
   });
 
-  await ensureUserHasAccessToProject({
+  await ensureUserHasAccessToTeam({
     prisma,
     user,
-    projectId: instance.projectId,
+    teamId: instance.teamId,
   });
 
   const postgresJsInstance = await getPostgresJsInstance({

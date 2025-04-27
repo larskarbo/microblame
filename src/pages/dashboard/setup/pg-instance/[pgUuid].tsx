@@ -11,6 +11,8 @@ import { Input } from "../../../../components/Input";
 import { zodStringOrNumberToNumber } from "../../../../components/utils";
 import { ClipboardDocumentIcon } from "@heroicons/react/24/outline";
 import toast from "react-hot-toast";
+import { NoPgInstancesMessage } from "../../../../components/dashboard/NoPgInstancesMessage";
+import { isBrowser } from "../../../../env";
 
 const parseConnectionString = (
   connectionString: string
@@ -160,6 +162,16 @@ const NewPostgresInstanceForm = ({ pgUuid }: { pgUuid: string }) => {
 
   if (error) {
     return <div className="text-red-500">{error.message}</div>;
+  }
+
+  // Only check for instances if we're NOT on the new instance page
+  if (pgUuid !== 'new' && me && me.Team.PgInstances.length === 0) {
+    return (
+      <div className="p-8">
+        <h1 className="mb-8 text-3xl font-extrabold">Postgres Instance</h1>
+        <NoPgInstancesMessage />
+      </div>
+    );
   }
 
   return (
@@ -370,9 +382,13 @@ const NewPostgresInstanceForm = ({ pgUuid }: { pgUuid: string }) => {
         ) : (
           <Button
             onClick={() => {
+              if (!me?.teamId) {
+                alert("Could not find your team");
+                return;
+              }
               addPgInstance({
                 instance: workingPginstace,
-                projectId: me!.Team.Projects[0]!.id,
+                teamId: me.teamId,
               });
             }}
             isLoading={isAddingPgInstance}

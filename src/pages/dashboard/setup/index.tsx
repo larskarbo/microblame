@@ -7,6 +7,7 @@ import { LoggedInPage } from "../../../components/layout/auth";
 import { isBrowser } from "../../../env";
 import { InlineCode } from "../../../components/InlineCode";
 import Link from "next/link";
+import { NoPgInstancesMessage } from "../../../components/dashboard/NoPgInstancesMessage";
 
 const SetupPage = () => {
   const { data: me } = trpc.me.useQuery();
@@ -15,7 +16,21 @@ const SetupPage = () => {
     return null;
   }
 
-  const pgInstances = me!.Team!.Projects[0]!.PgInstances;
+  // Check if the user has any database instances
+  if (me.Team.PgInstances.length === 0) {
+    return (
+      <LoggedInPage>
+        <Layout>
+          <div className="p-8">
+            <h1 className="mb-8 text-3xl font-extrabold">Setup</h1>
+            <NoPgInstancesMessage />
+          </div>
+        </Layout>
+      </LoggedInPage>
+    );
+  }
+
+  const pgInstances = me.Team.PgInstances;
 
   return (
     <LoggedInPage>
