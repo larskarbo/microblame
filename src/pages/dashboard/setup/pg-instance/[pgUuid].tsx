@@ -10,7 +10,12 @@ import { InlineCode } from "../../../../components/InlineCode";
 import { Input } from "../../../../components/Input";
 import { zodStringOrNumberToNumber } from "../../../../components/utils";
 import { ClipboardDocumentIcon } from "@heroicons/react/24/outline";
-import { ArrowPathIcon, BeakerIcon, PlusCircleIcon, TrashIcon } from "@heroicons/react/20/solid";
+import {
+  ArrowPathIcon,
+  BeakerIcon,
+  PlusCircleIcon,
+  TrashIcon,
+} from "@heroicons/react/20/solid";
 import toast from "react-hot-toast";
 import { NoPgInstancesMessage } from "../../../../components/dashboard/NoPgInstancesMessage";
 import { isBrowser } from "../../../../env";
@@ -102,21 +107,21 @@ const NewPostgresInstanceForm = ({ pgUuid }: { pgUuid: string }) => {
 
   const router = useRouter();
 
-  const { mutate: addPgInstance, isLoading: isAddingPgInstance } =
+  const { mutate: addPgInstance, isPending: isAddingPgInstance } =
     trpc.setup.addPgInstance.useMutation({
       onSuccess: () => {
         router.push("/dashboard/setup");
       },
     });
 
-  const { mutate: updatePgInstance, isLoading: isUpdatingPgInstance } =
+  const { mutate: updatePgInstance, isPending: isUpdatingPgInstance } =
     trpc.setup.updatePgInstance.useMutation({
       onSuccess: () => {
         router.push("/dashboard/setup");
       },
     });
 
-  const { mutate: deletePgInstance, isLoading: isDeletingPgInstance } =
+  const { mutate: deletePgInstance, isPending: isDeletingPgInstance } =
     trpc.setup.deletePgInstance.useMutation({
       onSuccess: () => {
         router.push("/dashboard/setup");
@@ -126,7 +131,7 @@ const NewPostgresInstanceForm = ({ pgUuid }: { pgUuid: string }) => {
   const {
     data: testResult,
     mutate: testPgConnection,
-    isLoading: isTestingPgConnection,
+    isPending: isTestingPgConnection,
   } = trpc.setup.testPgConnection.useMutation();
 
   const { data: pgInstance, error } = trpc.setup.getPgInstance.useQuery(
