@@ -48,37 +48,6 @@ async function main() {
   }
 
   // Users
-  const user = await prisma.user.create({
-    data: {
-      email: process.env.DEFAULT_SEED_EMAIL || undefined,
-      name: "Default User",
-      Team: {
-        create: {
-          name: "Default Team",
-          Projects: {
-            create: {
-              name: "Default Project",
-              PgInstances: {
-                create: {
-                  name: "Default PgInstance",
-                  pgDatabase: "layer3",
-                  pgHost: "localhost",
-                  pgPasswordEncrypted: "",
-                  pgPort: 5432,
-                  pgUser: "lars",
-                  ssl: false,
-                },
-              },
-            },
-          },
-        },
-      },
-    },
-  });
-
-  if (user.id !== 1) {
-    throw new Error(`Expected user.id to be 1, but got ${user.id}`);
-  }
 
   console.log(`Seeding finished.`);
 }
