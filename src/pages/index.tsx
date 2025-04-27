@@ -13,7 +13,6 @@ export const Home = () => {
           content="Find and fix slow Postgres queries with precise source code mapping"
         />
       </Head>
-
       <main className="max-w-5xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
         <div className="text-center">
           <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl md:text-6xl">
@@ -27,19 +26,19 @@ export const Home = () => {
             No more endless debugging or guesswork.
           </p>
           <div className="mt-10 flex justify-center gap-4">
-            <Link href="/dashboard" passHref>
+            <Link href="/dashboard" passHref legacyBehavior>
               <Button className="px-8 py-3 text-base bg-indigo-600 text-white hover:bg-indigo-700 border-indigo-600">
                 Go to Dashboard
               </Button>
             </Link>
-            <Link href="/dashboard/setup" passHref>
+            <Link href="/dashboard/setup" passHref legacyBehavior>
               <Button className="px-8 py-3 text-base">Setup Guide</Button>
             </Link>
           </div>
         </div>
       </main>
     </div>
-  )
+  );
 }
 
 export default Home

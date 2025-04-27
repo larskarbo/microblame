@@ -10,10 +10,11 @@ import { InlineCode } from "../../../../components/InlineCode";
 import { Input } from "../../../../components/Input";
 import { zodStringOrNumberToNumber } from "../../../../components/utils";
 import { ClipboardDocumentIcon } from "@heroicons/react/24/outline";
+import { ArrowPathIcon, BeakerIcon, PlusCircleIcon, TrashIcon } from "@heroicons/react/20/solid";
 import toast from "react-hot-toast";
 import { NoPgInstancesMessage } from "../../../../components/dashboard/NoPgInstancesMessage";
 import { isBrowser } from "../../../../env";
-
+import { atom, useAtom } from "jotai";
 const parseConnectionString = (
   connectionString: string
 ): Partial<PgInstance> => {
@@ -92,10 +93,12 @@ export const pgInstanceSchema = z.object({
 
 type PgInstance = z.infer<typeof pgInstanceSchema>;
 
+const connectionStringAtom = atom<string>("");
+
 const NewPostgresInstanceForm = ({ pgUuid }: { pgUuid: string }) => {
   const { data: me } = trpc.me.useQuery();
 
-  const [connectionString, setConnectionString] = useState("");
+  const [connectionString, setConnectionString] = useAtom(connectionStringAtom);
 
   const router = useRouter();
 
@@ -148,6 +151,17 @@ const NewPostgresInstanceForm = ({ pgUuid }: { pgUuid: string }) => {
     ssl: false,
   });
 
+  const [showAddButton, setShowAddButton] = useState(false);
+
+  useEffect(() => {
+    if (testResult) {
+      const allTestsPass =
+        testResult.canSelect1.status === "success" &&
+        testResult.canUsePgStatStatements.status === "success";
+      setShowAddButton(allTestsPass);
+    }
+  }, [testResult]);
+
   useEffect(() => {
     if (pgInstance) {
       setWorkingPgInstance({
@@ -165,7 +179,7 @@ const NewPostgresInstanceForm = ({ pgUuid }: { pgUuid: string }) => {
   }
 
   // Only check for instances if we're NOT on the new instance page
-  if (pgUuid !== 'new' && me && me.Team.PgInstances.length === 0) {
+  if (pgUuid !== "new" && me && me.Team.PgInstances.length === 0) {
     return (
       <div className="p-8">
         <h1 className="mb-8 text-3xl font-extrabold">Postgres Instance</h1>
@@ -173,6 +187,17 @@ const NewPostgresInstanceForm = ({ pgUuid }: { pgUuid: string }) => {
       </div>
     );
   }
+
+  const handleInitialTestConnection = () => {
+    // Initial test - resets UI
+    testPgConnection(workingPginstace);
+    setShowAddButton(false);
+  };
+
+  const handleRecheckConnection = () => {
+    // Just recheck, don't reset UI state
+    testPgConnection(workingPginstace);
+  };
 
   return (
     <div className="max-w-xl flex flex-col gap-4">
@@ -350,7 +375,16 @@ const NewPostgresInstanceForm = ({ pgUuid }: { pgUuid: string }) => {
       </div>
 
       <div className="flex space-x-4 mt-8">
-        {pgInstance ? (
+        <Button
+          onClick={handleInitialTestConnection}
+          isLoading={isTestingPgConnection}
+          className="bg-blue-500 hover:bg-blue-600 text-white flex items-center gap-1.5 shadow-sm"
+        >
+          <BeakerIcon className="h-4 w-4" />
+          Test connection
+        </Button>
+
+        {pgInstance && (
           <>
             <Button
               onClick={() => {
@@ -360,7 +394,9 @@ const NewPostgresInstanceForm = ({ pgUuid }: { pgUuid: string }) => {
                 });
               }}
               isLoading={isUpdatingPgInstance}
+              className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-1.5 shadow-sm"
             >
+              <ArrowPathIcon className="h-4 w-4" />
               Update instance
             </Button>
             <Button
@@ -375,11 +411,15 @@ const NewPostgresInstanceForm = ({ pgUuid }: { pgUuid: string }) => {
                 }
               }}
               isLoading={isDeletingPgInstance}
+              className="bg-red-500 hover:bg-red-600 text-white flex items-center gap-1.5 shadow-sm"
             >
+              <TrashIcon className="h-4 w-4" />
               Delete instance
             </Button>
           </>
-        ) : (
+        )}
+
+        {testResult && showAddButton && !pgInstance && (
           <Button
             onClick={() => {
               if (!me?.teamId) {
@@ -392,75 +432,156 @@ const NewPostgresInstanceForm = ({ pgUuid }: { pgUuid: string }) => {
               });
             }}
             isLoading={isAddingPgInstance}
+            className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-1.5 shadow-sm"
           >
+            <PlusCircleIcon className="h-4 w-4" />
             Add instance
           </Button>
         )}
-
-        <Button
-          onClick={() => {
-            testPgConnection(workingPginstace);
-          }}
-          isLoading={isTestingPgConnection}
-        >
-          Test connection
-        </Button>
       </div>
 
-      {testResult && <TestResultShower data={testResult} />}
+      {testResult && (
+        <TestResultShower
+          data={testResult}
+          pgUser={workingPginstace.pgUser}
+          onRefetch={handleRecheckConnection}
+        />
+      )}
     </div>
   );
 };
 
 const TestResultShower = ({
   data,
+  pgUser,
+  onRefetch,
 }: {
   data: {
     canSelect1: { status: string; errorMessage?: string | null };
     canUsePgStatStatements: { status: string; errorMessage?: string | null };
   };
+  pgUser: string;
+  onRefetch: () => void;
 }) => {
-  return (
-    <ul className="text-xs mt-4 font-medium list-disc">
-      {data.canSelect1.status === "success" ? (
-        <li className="text-green-800">Connection successful ✅</li>
-      ) : (
-        <li className="text-red-500">
-          Connection failed. {data.canSelect1.errorMessage}
-        </li>
-      )}
+  const connectionSuccessful = data.canSelect1.status === "success";
+  const pgStatStatementsWorking =
+    data.canUsePgStatStatements.status === "success";
 
-      {data.canSelect1.status === "success" && (
-        <>
-          {data.canUsePgStatStatements.status === "success" ? (
-            <li className="text-green-800">
-              Was able to query pg_stat_statements ✅
-            </li>
-          ) : (
-            <>
-              <li className="text-red-500">
-                Could not query pg_stat_statements. (
-                <strong className="text-red-600">
-                  {data.canUsePgStatStatements.errorMessage}
-                </strong>
-                ).
-              </li>
-              <ul className=" list-disc ">
-                <li>
-                  Make sure you have the <code>pg_stat_statements</code>{" "}
-                  extension enabled.
-                </li>
-                <InlineCode>CREATE EXTENSION pg_stat_statements;</InlineCode>
-                <li>
-                  Make sure your user has the necessary permissions to query{" "}
-                  <code>pg_stat_statements</code>.
-                </li>
-                <InlineCode>GRANT pg_stat_statements TO your_user;</InlineCode>
-              </ul>
-            </>
-          )}
-        </>
-      )}
-    </ul>
+  const allTestsPass = connectionSuccessful && pgStatStatementsWorking;
+  const hasErrors = !connectionSuccessful || !pgStatStatementsWorking;
+
+  return (
+    <div className="mt-6 p-6 border rounded-md bg-slate-50">
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-lg font-semibold">Setup Checklist</h3>
+        {hasErrors && (
+          <Button
+            onClick={onRefetch}
+            className="text-sm py-1.5 px-3 flex items-center gap-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border-indigo-200 shadow-sm"
+          >
+            <ArrowPathIcon className="w-4 h-4" />
+            Recheck
+          </Button>
+        )}
+      </div>
+
+      <div className="space-y-6">
+        {/* Step 1: Basic Connection */}
+        <div className="flex items-center">
+          <div
+            className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center ${
+              connectionSuccessful
+                ? "bg-green-100 text-green-700"
+                : "bg-red-100 text-red-700"
+            }`}
+          >
+            {connectionSuccessful ? "✓" : "!"}
+          </div>
+          <div className="flex-1 ml-3">
+            <h4 className="text-base font-medium leading-none">
+              Step 1: Connect to PostgreSQL
+            </h4>
+            {connectionSuccessful ? (
+              <p className="text-sm text-green-700 mt-1">
+                Connection successful! ✅
+              </p>
+            ) : (
+              <div className="text-sm text-red-600 mt-1">
+                <p>Connection failed: {data.canSelect1.errorMessage}</p>
+                <p className="mt-1">
+                  Check your connection details and try again.
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Only show next step if connection works */}
+        {connectionSuccessful && (
+          <>
+            {/* Step 2: pg_stat_statements extension */}
+            <div className="flex items-center">
+              <div
+                className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center ${
+                  pgStatStatementsWorking
+                    ? "bg-green-100 text-green-700"
+                    : "bg-amber-100 text-amber-700"
+                }`}
+              >
+                {pgStatStatementsWorking ? "✓" : "!"}
+              </div>
+              <div className="flex-1 ml-3">
+                <h4 className="text-base font-medium leading-none">
+                  Step 2: Set up <InlineCode>pg_stat_statements</InlineCode>{" "}
+                  extension and permissions
+                </h4>
+
+                {pgStatStatementsWorking ? (
+                  <p className="text-sm text-green-700 mt-1">
+                    Extension and permissions configured correctly ✅
+                  </p>
+                ) : (
+                  <div className="text-sm mt-1">
+                    <p className="text-amber-700 mb-2">
+                      Configuration required:
+                    </p>
+
+                    <p className="mb-1 text-sm">1. Install the extension:</p>
+                    <div className="mb-3">
+                      <InlineCode>
+                        CREATE EXTENSION pg_stat_statements;
+                      </InlineCode>
+                    </div>
+
+                    <p className="mb-1 text-sm">
+                      2. Grant permissions to user:
+                    </p>
+                    <div className="mb-2">
+                      <InlineCode>
+                        GRANT pg_stat_statements TO {pgUser};
+                      </InlineCode>
+                    </div>
+
+                    {data.canUsePgStatStatements.errorMessage?.includes(
+                      "does not exist"
+                    ) && (
+                      <p className="mt-2 text-slate-600 text-sm">
+                        <strong>Note:</strong> The error indicates that the
+                        pg_stat_statements object doesn't exist. Make sure
+                        you've installed the extension first.
+                      </p>
+                    )}
+
+                    <p className="mt-2 text-slate-500 text-xs">
+                      Error details: {data.canUsePgStatStatements.errorMessage}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
   );
 };

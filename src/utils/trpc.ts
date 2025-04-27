@@ -40,6 +40,7 @@ export const trpc = createTRPCNext<AppRouter>({
               // authorization: getAuthCookie(),
             };
           },
+          transformer: superjson,
         }),
       ],
       queryClientConfig: {
@@ -61,11 +62,11 @@ export const trpc = createTRPCNext<AppRouter>({
           },
         },
       },
-      transformer: superjson,
     };
   },
   /**
    * @link https://trpc.io/docs/ssr
    **/
   ssr: false,
+  transformer: superjson,
 });

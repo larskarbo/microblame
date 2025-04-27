@@ -1,0 +1,38 @@
+---
+description: If you need a custom icon for a component, like <TrashIcon />, use this tool.
+globs: *.tsx
+alwaysApply: false
+---
+
+# Using icons from a library
+
+Use the `@heroicons/react` library for icons.
+
+There are four variations:
+- micro: /16/solid
+- mini: /20/solid
+- solid: /24/solid
+- outline: /24/outline
+
+Usually, we choose mini.
+
+Example:
+
+```tsx
+import { TrashIcon } from "@heroicons/react/20/solid"
+
+<TrashIcon className="h-4 text-content-tertiary hover:opacity-80" />
+
+
+
+import { MagnifyingGlassIcon, XCircleIcon } from "@heroicons/react/20/solid"
+
+...
+  iconSize = 20,
+...
+
+<MagnifyingGlassIcon
+    width={iconSize}
+    className="absolute left-3 top-[10px]"
+    />
+```

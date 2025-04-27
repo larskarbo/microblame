@@ -26,7 +26,7 @@ export const Instances = () => {
             {instances.map(({ instance, connectionDataPoints }) => (
               <div key={instance.id} className=" gap-4 items-center border p-2">
                 <div className="text-sm w-64 pb-4">{instance.name}</div>
-                <Link href={`/dashboard`} passHref key={instance.id}>
+                <Link href={`/dashboard`} passHref key={instance.id} legacyBehavior>
                   <Button>Top queries</Button>
                 </Link>
                 <ConnectionsPlot plotData={connectionDataPoints} />

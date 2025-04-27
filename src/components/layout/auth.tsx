@@ -1,6 +1,6 @@
 import { isNull } from "lodash";
 import { useRouter } from "next/router";
-import { useEffect } from "react";
+import { useEffect, type JSX } from "react";
 import { trpc } from "../../utils/trpc";
 import { Spinner } from "../Spinner";
 

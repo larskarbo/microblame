@@ -1,0 +1,156 @@
+---
+description: In react: doing data fetching, or a function with error state, a mutation, a loading state or any user interaction. Don't use setLoading, setError etc, read here instead.
+globs: 
+alwaysApply: false
+---
+
+# React Data Fetching and State Management Guide
+
+This guide explains how to properly handle data fetching, mutations, loading states, and error handling in React components.
+
+We use react-query (either through trpc or custom) with `useQuery` and `useMutation` instead of custom [isLoading, setIsLoading] / [error, setError] etc states.
+
+## Data Fetching with useQuery
+
+Use queries when you need to fetch and display data. They automatically handle loading and error states.
+
+### trpc (for all backend calls)
+
+```tsx
+// Fetch data with tRPC
+const { data, isLoading, error } = trpc.example.useQuery({
+  // query parameters go here
+})
+
+// Usage in JSX
+if (isLoading) return <Spinner />
+if (error) return <ErrorDisplay message={error.message} />
+return <DataDisplay data={data} />
+```
+
+### custom userQuery (not used very often)
+
+```tsx
+// Custom query with React Query
+const { data, isLoading, error } = useQuery({
+  queryKey: ["block", chainId, "finalized"],
+  queryFn: async () => {
+    const finalizedBlock = await getFinalizedBlock(chainId)
+    return finalizedBlock
+  },
+})
+```
+
+## Handling User Actions (button clicks, one-off actions/queries) with useMutation
+
+Use useMutation for handling all user interactions that involve an error state or a loading state, and results.
+
+### Using tRPC Mutations (Preferred Method)
+
+```tsx
+// a query
+const { data, isLoading } = trpc.example.useQuery({})
+const utils = trpc.useUtils()
+// Define the mutation
+const { mutate, isPending } = trpc.updateExample.useMutation({
+  onSuccess: (data) => {
+    void utils.example.invalidate()
+  },
+})
+
+{data && <div>{data.name}</div>}
+<Button 
+  onClick={() => mutate({ id: 123 })}
+  isLoading={isPending}
+>
+  Submit
+</Button>
+```
+
+### Using React Query for Custom Mutations
+
+```tsx
+const copyImageMutation = useMutation({
+  mutationFn: async () => {
+    const copied = await doCopyImage()
+    return copied
+  },
+  onSuccess: () => {
+    toast.success("Image copied to clipboard")
+  },
+})
+
+<Button 
+  onClick={() => copyImageMutation.mutate()}
+  isLoading={copyImageMutation.isPending}
+  color="secondary"
+>
+  Copy Image
+</Button>
+// if you need the result of the mutation, you can get it from the response
+{copyImageMutation.data && <div>{copyImageMutation.data.name}</div>}
+```
+
+#### Destructuring vs not destructuring:
+
+Both approaches are valid.
+
+Destructuring:
+
+```tsx
+const { mutate, isPending } = trpc.updateExample.useMutation({})
+```
+
+Not destructuring:
+
+When not destructuring, lets always add the suffix `Mutation` to the response variable name.
+
+```tsx
+const updateExampleMutation = trpc.updateExample.useMutation({})
+```
+
+```tsx
+
+const SomeComponent = () => {
+  const updateQuorumMutation = useUpdateRootQuorum()
+
+  ...
+}
+
+const useUpdateRootQuorum = () => {
+  return useMutation({
+    mutationFn: async () => {
+      const updated = await doUpdateCustom()
+      return updated
+    },
+  })
+}
+```
+
+#### custom toasts
+
+If you want to add a custom toast to a onSuccess, use sonner
+
+
+```tsx
+import { toast } from "sonner"
+
+const testL3CosignerMutation =
+  trpc.admin.smartWallet.testL3Cosigner.useMutation({
+    onSuccess: ({ signedMessage }) => {
+      toast.success(
+        `L3 cosigner test successful: ${shortenString(signedMessage)}`,
+      )
+    },
+  })
+```
+
+## Notes
+
+### About useMutation
+- Error handling: Mutations show an error toast by default when they fail (we usually don't show custom UI, but sometimes it can be nice)
+
+### About <Button /> Component
+- The `isLoading` prop automatically:
+  - sets isDisabled to true (no need to manually set `disabled={isPending}`)
+  - Displays a loading spinner

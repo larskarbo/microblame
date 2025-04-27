@@ -48,6 +48,7 @@ const SetupPage = () => {
                     href={`/dashboard/setup/pg-instance/${pgInstance.uuid}`}
                     passHref
                     key={pgInstance.id}
+                    legacyBehavior
                   >
                     <Button>Edit Connection Details</Button>
                   </Link>
@@ -62,7 +63,11 @@ const SetupPage = () => {
             </div>
 
             <div className="my-4"></div>
-            <Link href="/dashboard/setup/pg-instance/new" passHref>
+            <Link
+              href="/dashboard/setup/pg-instance/new"
+              passHref
+              legacyBehavior
+            >
               <Button>New Postgres Instance</Button>
             </Link>
 
@@ -110,7 +115,7 @@ const ClickHouseStatus = () => {
             <div className="bg-red-100 text-red-800 text-xs p-2 rounded-md mb-4">
               {error.message}
             </div>
-          ) : (
+          ) : stats ? (
             <ul className=" list-disc">
               <li>
                 <InlineCode>otel_traces</InlineCode>: There are{" "}
@@ -136,7 +141,7 @@ const ClickHouseStatus = () => {
                 in ClickHouse.
               </li>
             </ul>
-          )}
+          ) : null}
         </>
       )}
     </div>

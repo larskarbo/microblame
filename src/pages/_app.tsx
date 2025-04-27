@@ -6,19 +6,22 @@ import "../global.css";
 import { trpc } from "../utils/trpc";
 import { Toaster } from "react-hot-toast";
 
+import { NuqsAdapter } from "nuqs/adapters/next/pages";
 function MyApp({ Component, pageProps }: AppProps) {
   return (
     <>
-      <Component {...pageProps} />
+      <NuqsAdapter>
+        <Component {...pageProps} />
 
-      <Toaster
-        toastOptions={{
-          style: {
-            maxWidth: 450,
-            wordBreak: "break-word",
-          },
-        }}
-      />
+        <Toaster
+          toastOptions={{
+            style: {
+              maxWidth: 450,
+              wordBreak: "break-word",
+            },
+          }}
+        />
+      </NuqsAdapter>
     </>
   );
 }

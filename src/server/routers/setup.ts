@@ -65,9 +65,6 @@ export const setupRouter = router({
         }
 
         password = await decryptPassword(pgInstance.pgPasswordEncrypted);
-        console.log("password: ", password);
-        console.log("password: ", password.length);
-        console.log("pgInstance: ", pgInstance);
       }
 
       if (isNull(password)) {
