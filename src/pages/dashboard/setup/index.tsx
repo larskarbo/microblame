@@ -1,13 +1,13 @@
 import { useState } from "react";
-import { Button } from "../../../components/Button";
-import Layout from "../../../components/layout/Layout";
-import { Spinner } from "../../../components/Spinner";
-import { trpc } from "../../../utils/trpc";
-import { LoggedInPage } from "../../../components/layout/auth";
-import { isBrowser } from "../../../env";
-import { InlineCode } from "../../../components/InlineCode";
+import { Button } from "@/components/Button";
+import Layout from "@/components/layout/Layout";
+import { Spinner } from "@/components/Spinner";
+import { trpc } from "@/utils/trpc";
+import { LoggedInPage } from "@/components/layout/auth";
+import { isBrowser } from "@/env";
+import { InlineCode } from "@/components/InlineCode";
 import Link from "next/link";
-import { NoPgInstancesMessage } from "../../../components/dashboard/NoPgInstancesMessage";
+import { NoPgInstancesMessage } from "@/components/dashboard/NoPgInstancesMessage";
 
 const SetupPage = () => {
   const { data: me } = trpc.me.useQuery();

@@ -1,20 +1,24 @@
 import { useEffect } from "react";
 import { useQueryState } from "nuqs";
 
-import { Button } from "../../components/Button";
-import Layout from "../../components/layout/Layout";
-import { QueryRow } from "../../components/QueryRow";
-import { Spinner } from "../../components/Spinner";
-import { trpc } from "../../utils/trpc";
+import { Button } from "@/components/Button";
+import Layout from "@/components/layout/Layout";
+import { QueryRow } from "@/components/QueryRow";
+import { Spinner } from "@/components/Spinner";
+import { trpc } from "@/utils/trpc";
 import { formatDistanceToNow } from "date-fns";
-import { NoPgInstancesMessage } from "../../components/dashboard/NoPgInstancesMessage";
+import { NoPgInstancesMessage } from "@/components/dashboard/NoPgInstancesMessage";
 
 export const Project = () => {
-  const [instanceUuid, setInstanceUuid] = useQueryState('instance');
+  const [instanceUuid, setInstanceUuid] = useQueryState("instance");
   const { data: me } = trpc.me.useQuery();
-  
+
   useEffect(() => {
-    if (instanceUuid === null && me?.Team?.PgInstances && me.Team.PgInstances.length > 0) {
+    if (
+      instanceUuid === null &&
+      me?.Team?.PgInstances &&
+      me.Team.PgInstances.length > 0
+    ) {
       const firstInstance = me.Team.PgInstances[0];
       if (firstInstance) {
         setInstanceUuid(firstInstance.uuid);
@@ -34,7 +38,7 @@ export const Project = () => {
 
   const utils = trpc.useUtils();
 
-  const { mutate: resetPgStats, isLoading: isResettingPgStats } =
+  const { mutate: resetPgStats, isPending: isResettingPgStats } =
     trpc.insight.resetPgStats.useMutation({
       onSuccess() {
         void utils.insight.getQueries.invalidate();
@@ -43,7 +47,6 @@ export const Project = () => {
     });
 
   // Check if the user has any database instances
-  console.log('me: ', me);
   if (me && me.Team.PgInstances.length === 0) {
     return (
       <Layout>

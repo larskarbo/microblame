@@ -19,6 +19,10 @@
 		"jsx": "preserve",
 		"incremental": true,
 		"noUncheckedIndexedAccess": true,
+		"baseUrl": ".",
+		"paths": {
+			"@/*": ["src/*"]
+		},
 		"types": [
 			"vitest/globals"
 		]

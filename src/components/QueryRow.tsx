@@ -1,6 +1,6 @@
-import { ChevronDownIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
+import { XMarkIcon } from "@heroicons/react/20/solid";
 import clsx from "clsx";
-import { round, truncate } from "lodash";
+import { round } from "lodash";
 import { useState } from "react";
 import { trpc } from "../utils/trpc";
 import { Code } from "./Code";
@@ -14,7 +14,7 @@ export const QueryRow = ({
     lastSnapshottedQuery?: SnapshottedQuery;
   };
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOverlayOpen, setIsOverlayOpen] = useState(false);
 
   const { data, isLoading, isError } = trpc.insight.getTracedQuery.useQuery(
     {
@@ -37,15 +37,9 @@ export const QueryRow = ({
     const lastSnapshottedQueryTimestamp = new Date(
       parseInt(lastSnapshottedQuery.timestampUnix)
     ).getTime();
-    console.log("pgRow.timestamp: ", pgRow);
     const queryTimestamp = pgRow.timestamp.getTime();
     const timeDiff = queryTimestamp - lastSnapshottedQueryTimestamp;
     const callsDiff = pgRow.calls - lastSnapshottedQuery.calls;
-    console.log("callsDiff: ", {
-      callsDiff,
-      pgRowCalls: pgRow.calls,
-      lastSnapshottedQueryCalls: lastSnapshottedQuery.calls,
-    });
     callsPerMinute = (callsDiff / (timeDiff / 1000)) * 60;
   }
 
@@ -53,25 +47,16 @@ export const QueryRow = ({
     <>
       <tr
         className={clsx(
-          "h-6 font-mono align-top  border-x border-t  cursor-pointer text-xxs hover:bg-gray-50 ",
-          isOpen ? " bg-slate-100 border-gray-900" : "border-transparent "
+          "h-6 font-mono align-top cursor-pointer text-xxs hover:bg-gray-50",
+          isOverlayOpen ? "bg-slate-100" : ""
         )}
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => setIsOverlayOpen(true)}
       >
         <td></td>
-        <td>
-          {isOpen ? (
-            <ChevronDownIcon className="w-3 h-3" />
-          ) : (
-            <ChevronRightIcon className="w-3 h-3" />
-          )}
+        <td></td>
+        <td className="select-none truncate max-w-xs overflow-hidden pr-6">
+          {pgRow.query}
         </td>
-        <td>
-          {truncate(pgRow.query, {
-            length: 20,
-          })}
-        </td>
-
         <td>
           {pgRow.mean_exec_time ? round(pgRow.mean_exec_time, 1) : null}
           ms
@@ -105,78 +90,123 @@ export const QueryRow = ({
           />
         </td>
       </tr>
-      {isOpen && (
-        <>
-          <tr className="text-xxs">
-            <td
-              colSpan={99}
-              className="w-full px-8 pb-4 border-b border-gray-900 border-x bg-slate-100"
-            >
-              <div className="grid grid-cols-2 gap-4">
-                <div onClick={() => {}}>
-                  <Code
-                    className="h-48 overflow-auto whitespace-break-spaces"
-                    language="sql"
-                    code={sampleTracedQuery?.dbStatement || pgRow.query}
-                  />
-                </div>
-                <div>
-                  <div className="font-semibold">Observability data</div>
-                  {tracedQueryWithStats ? (
-                    <>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          Prisma spans:
-                          <ItemsTextarea
-                            items={
-                              tracedQueryWithStats.distinctPrismaSpansWithCount
-                            }
-                          />
-                        </div>
-                        <div>
-                          TRPC spans:
-                          <ItemsTextarea
-                            items={
-                              tracedQueryWithStats.distinctTRPCSpansWithCount
-                            }
-                          />
-                        </div>
-                        <div>
-                          Service names:
-                          <ItemsTextarea
-                            items={
-                              tracedQueryWithStats.distinctServiceNamesWithCount
-                            }
-                          />
-                        </div>
-                        <div>
-                          Http paths:
-                          <ItemsTextarea
-                            items={
-                              tracedQueryWithStats.distinctHttpTargetsWithCount
-                            }
-                          />
-                        </div>
-                      </div>
-                      <div>
-                        Average duration: {tracedQueryWithStats?.avgDurMs} ms
-                      </div>
-                    </>
-                  ) : (
-                    <div className="text-gray-600">
-                      No observability data found
-                    </div>
-                  )}
-                </div>
-              </div>
-            </td>
-          </tr>
-
-          <tr>
-            <td className="pt-4" />
-          </tr>
-        </>
+      {isOverlayOpen && (
+        <QueryDetailsOverlay
+          onClose={() => setIsOverlayOpen(false)}
+          pgRow={pgRow}
+          tracedQueryWithStats={tracedQueryWithStats}
+          sampleTracedQuery={sampleTracedQuery}
+        />
       )}
+      {/* Transparent overlay for closing */}
+      {isOverlayOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-transparent"
+          onClick={() => setIsOverlayOpen(false)}
+          aria-label="Close overlay"
+        />
+      )}
+    </>
+  );
+};
+
+const QueryDetailsOverlay = ({
+  onClose,
+  pgRow,
+  tracedQueryWithStats,
+  sampleTracedQuery,
+}: {
+  onClose: () => void;
+  pgRow: PgRow & { lastSnapshottedQuery?: SnapshottedQuery };
+  tracedQueryWithStats: any;
+  sampleTracedQuery: any;
+}) => {
+  return (
+    <>
+      {/* Transparent overlay for closing */}
+      <div
+        className="fixed inset-0 z-40 bg-transparent"
+        onClick={onClose}
+        aria-label="Close overlay"
+      />
+      {/* Overlay panel */}
+      <div className="fixed top-0 right-0 h-full w-full max-w-3xl md:w-[75vw] z-50 bg-white border-l border-gray-200 shadow-xl overflow-y-auto animate-slide-in">
+        <div className="flex items-center justify-between p-4 border-b border-gray-200">
+          <div className="font-bold text-lg">Query Details</div>
+          <button onClick={onClose} className="hover:opacity-70">
+            <XMarkIcon className="h-6 w-6" />
+          </button>
+        </div>
+        <div className="p-4 flex flex-col gap-4">
+          {/* Query stats */}
+          <div className="flex flex-wrap gap-6 text-xs text-gray-700">
+            <div>
+              <span className="font-semibold">Mean exec time:</span>{" "}
+              {pgRow.mean_exec_time
+                ? `${round(pgRow.mean_exec_time, 1)} ms`
+                : "-"}
+            </div>
+            <div>
+              <span className="font-semibold">Total duration:</span>{" "}
+              {pgRow.total_exec_time
+                ? `${round(pgRow.total_exec_time)} s`
+                : "-"}
+            </div>
+            <div>
+              <span className="font-semibold">Calls:</span> {pgRow.calls}
+            </div>
+            <div>
+              <span className="font-semibold">% of load:</span>{" "}
+              {pgRow.percentageOfLoad}%
+            </div>
+          </div>
+          {/* Query preview full width */}
+          <div>
+            <Code
+              className="h-48 overflow-auto whitespace-break-spaces text-[10px] w-full"
+              language="sql"
+              code={sampleTracedQuery?.dbStatement || pgRow.query}
+            />
+          </div>
+          {/* Observability data */}
+          <div>
+            <div className="font-semibold">Observability data</div>
+            {tracedQueryWithStats ? (
+              <>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    Prisma spans:
+                    <ItemsTextarea
+                      items={tracedQueryWithStats.distinctPrismaSpansWithCount}
+                    />
+                  </div>
+                  <div>
+                    TRPC spans:
+                    <ItemsTextarea
+                      items={tracedQueryWithStats.distinctTRPCSpansWithCount}
+                    />
+                  </div>
+                  <div>
+                    Service names:
+                    <ItemsTextarea
+                      items={tracedQueryWithStats.distinctServiceNamesWithCount}
+                    />
+                  </div>
+                  <div>
+                    Http paths:
+                    <ItemsTextarea
+                      items={tracedQueryWithStats.distinctHttpTargetsWithCount}
+                    />
+                  </div>
+                </div>
+                <div>Average duration: {tracedQueryWithStats?.avgDurMs} ms</div>
+              </>
+            ) : (
+              <div className="text-gray-600">No observability data found</div>
+            )}
+          </div>
+        </div>
+      </div>
     </>
   );
 };

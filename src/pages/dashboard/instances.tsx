@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from "react";
-
-import { Button } from "../../components/Button";
-import Layout from "../../components/layout/Layout";
-import { QueryRow } from "../../components/QueryRow";
-import { Spinner } from "../../components/Spinner";
-import { trpc } from "../../utils/trpc";
+import * as Plot from "@observablehq/plot";
+import { Button } from "@/components/Button";
+import Layout from "@/components/layout/Layout";
+import { QueryRow } from "@/components/QueryRow";
+import { Spinner } from "@/components/Spinner";
+import { trpc } from "@/utils/trpc";
 import Link from "next/link";
 
 export const Instances = () => {
@@ -95,6 +95,5 @@ const ConnectionsPlot = ({
 
   return <div ref={containerRef} className=""></div>;
 };
-import * as Plot from "@observablehq/plot";
 
 export default Instances;

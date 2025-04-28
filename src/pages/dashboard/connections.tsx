@@ -1,5 +1,5 @@
-import Layout from "../../components/layout/Layout";
-import { trpc } from "../../utils/trpc";
+import Layout from "@/components/layout/Layout";
+import { trpc } from "@/utils/trpc";
 
 export const Project = () => {
   const { data: me } = trpc.me.useQuery();

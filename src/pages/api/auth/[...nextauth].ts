@@ -4,8 +4,8 @@ import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 
-import { GoogleAuthObj } from "../../../server/api/middleware";
-import { prisma } from "../../../db";
+import { GoogleAuthObj } from "@/server/api/middleware";
+import { prisma } from "@/db";
 
 if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
   throw new Error("GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET must be set");
