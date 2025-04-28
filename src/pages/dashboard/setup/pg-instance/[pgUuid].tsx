@@ -1,40 +1,40 @@
-import { useRouter } from "next/router"
-import { useEffect, useState } from "react"
-import Layout from "@/components/layout/Layout"
-import { LoggedInPage } from "@/components/layout/auth"
-import { trpc } from "@/utils/trpc"
+import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
+import Layout from "@/components/layout/Layout";
+import { LoggedInPage } from "@/components/layout/auth";
+import { trpc } from "@/utils/trpc";
 
-import { z } from "zod"
-import { Button } from "@/components/Button"
-import { InlineCode } from "@/components/InlineCode"
-import { Input } from "@/components/Input"
-import { zodStringOrNumberToNumber } from "@/components/utils"
-import { ClipboardDocumentIcon } from "@heroicons/react/24/outline"
+import { z } from "zod";
+import { Button } from "@/components/Button";
+import { InlineCode } from "@/components/InlineCode";
+import { Input } from "@/components/Input";
+import { zodStringOrNumberToNumber } from "@/components/utils";
+import { ClipboardDocumentIcon } from "@heroicons/react/24/outline";
 import {
   ArrowPathIcon,
   BeakerIcon,
   PlusCircleIcon,
   TrashIcon,
-} from "@heroicons/react/20/solid"
-import toast from "react-hot-toast"
-import { NoPgInstancesMessage } from "@/components/dashboard/NoPgInstancesMessage"
-import { atom, useAtom } from "jotai"
+} from "@heroicons/react/20/solid";
+import toast from "react-hot-toast";
+import { NoPgInstancesMessage } from "@/components/dashboard/NoPgInstancesMessage";
+import { atom, useAtom } from "jotai";
 const parseConnectionString = (
-  connectionString: string,
+  connectionString: string
 ): Partial<PgInstance> => {
   // Replace 'postgres://' with 'http://' to make it compatible with the URL constructor
   const modifiedConnectionString = connectionString
     .replace(/^postgres:\/\//, "http://")
-    .replace(/^postgresql:\/\//, "http://")
-  const url = new URL(modifiedConnectionString)
-  console.log("url: ", url)
+    .replace(/^postgresql:\/\//, "http://");
+  const url = new URL(modifiedConnectionString);
+  console.log("url: ", url);
 
-  const ssl = url.searchParams.get("sslmode") === "require"
-  const pgUser = url.username
-  const pgPassword = url.password
-  const pgHost = url.hostname
-  const pgPort = parseInt(url.port, 10)
-  const pgDatabase = url.pathname.slice(1)
+  const ssl = url.searchParams.get("sslmode") === "require";
+  const pgUser = url.username;
+  const pgPassword = url.password;
+  const pgHost = url.hostname;
+  const pgPort = parseInt(url.port, 10);
+  const pgDatabase = url.pathname.slice(1);
 
   return {
     pgUser,
@@ -46,21 +46,21 @@ const parseConnectionString = (
     pgPort,
     pgDatabase,
     ssl,
-  }
-}
+  };
+};
 
 const SetupPage = () => {
-  const { data: me } = trpc.me.useQuery()
-  const router = useRouter()
-  const { pgUuid } = router.query
-  console.log("pgUuid: ", pgUuid)
+  const { data: me } = trpc.me.useQuery();
+  const router = useRouter();
+  const { pgUuid } = router.query;
+  console.log("pgUuid: ", pgUuid);
 
   if (!me) {
-    return null
+    return null;
   }
 
   if (!pgUuid) {
-    return "No pgUuid"
+    return "No pgUuid";
   }
 
   return (
@@ -77,10 +77,10 @@ const SetupPage = () => {
         </div>
       </Layout>
     </LoggedInPage>
-  )
-}
+  );
+};
 
-export default SetupPage
+export default SetupPage;
 
 export const pgInstanceSchema = z.object({
   name: z.string(),
@@ -93,45 +93,45 @@ export const pgInstanceSchema = z.object({
   pgPort: zodStringOrNumberToNumber,
   pgDatabase: z.string(),
   ssl: z.boolean(),
-})
+});
 
-type PgInstance = z.infer<typeof pgInstanceSchema>
+type PgInstance = z.infer<typeof pgInstanceSchema>;
 
-const connectionStringAtom = atom<string>("")
+const connectionStringAtom = atom<string>("");
 
 const NewPostgresInstanceForm = ({ pgUuid }: { pgUuid: string }) => {
-  const { data: me } = trpc.me.useQuery()
+  const { data: me } = trpc.me.useQuery();
 
-  const [connectionString, setConnectionString] = useAtom(connectionStringAtom)
+  const [connectionString, setConnectionString] = useAtom(connectionStringAtom);
 
-  const router = useRouter()
+  const router = useRouter();
 
   const { mutate: addPgInstance, isPending: isAddingPgInstance } =
     trpc.setup.addPgInstance.useMutation({
       onSuccess: () => {
-        router.push("/dashboard/setup")
+        router.push("/dashboard/setup");
       },
-    })
+    });
 
   const { mutate: updatePgInstance, isPending: isUpdatingPgInstance } =
     trpc.setup.updatePgInstance.useMutation({
       onSuccess: () => {
-        router.push("/dashboard/setup")
+        router.push("/dashboard/setup");
       },
-    })
+    });
 
   const { mutate: deletePgInstance, isPending: isDeletingPgInstance } =
     trpc.setup.deletePgInstance.useMutation({
       onSuccess: () => {
-        router.push("/dashboard/setup")
+        router.push("/dashboard/setup");
       },
-    })
+    });
 
   const {
     data: testResult,
     mutate: testPgConnection,
     isPending: isTestingPgConnection,
-  } = trpc.setup.testPgConnection.useMutation()
+  } = trpc.setup.testPgConnection.useMutation();
 
   const { data: pgInstance, error } = trpc.setup.getPgInstance.useQuery(
     {
@@ -139,8 +139,8 @@ const NewPostgresInstanceForm = ({ pgUuid }: { pgUuid: string }) => {
     },
     {
       enabled: pgUuid !== "new",
-    },
-  )
+    }
+  );
 
   const [workingPginstace, setWorkingPgInstance] = useState<PgInstance>({
     name: "",
@@ -153,18 +153,18 @@ const NewPostgresInstanceForm = ({ pgUuid }: { pgUuid: string }) => {
     pgPort: 5432,
     pgDatabase: "",
     ssl: false,
-  })
+  });
 
-  const [showAddButton, setShowAddButton] = useState(false)
+  const [showAddButton, setShowAddButton] = useState(false);
 
   useEffect(() => {
     if (testResult) {
       const allTestsPass =
         testResult.canSelect1.status === "success" &&
-        testResult.canUsePgStatStatements.status === "success"
-      setShowAddButton(allTestsPass)
+        testResult.canUsePgStatStatements.status === "success";
+      setShowAddButton(allTestsPass);
     }
-  }, [testResult])
+  }, [testResult]);
 
   useEffect(() => {
     if (pgInstance) {
@@ -174,12 +174,12 @@ const NewPostgresInstanceForm = ({ pgUuid }: { pgUuid: string }) => {
           existingPasswordToPgInstanceUuid: pgInstance.uuid,
           newPassword: null,
         },
-      })
+      });
     }
-  }, [pgInstance])
+  }, [pgInstance]);
 
   if (error) {
-    return <div className="text-red-500">{error.message}</div>
+    return <div className="text-red-500">{error.message}</div>;
   }
 
   // Only check for instances if we're NOT on the new instance page
@@ -189,19 +189,19 @@ const NewPostgresInstanceForm = ({ pgUuid }: { pgUuid: string }) => {
         <h1 className="mb-8 text-3xl font-extrabold">Postgres Instance</h1>
         <NoPgInstancesMessage />
       </div>
-    )
+    );
   }
 
   const handleInitialTestConnection = () => {
     // Initial test - resets UI
-    testPgConnection(workingPginstace)
-    setShowAddButton(false)
-  }
+    testPgConnection(workingPginstace);
+    setShowAddButton(false);
+  };
 
   const handleRecheckConnection = () => {
     // Just recheck, don't reset UI state
-    testPgConnection(workingPginstace)
-  }
+    testPgConnection(workingPginstace);
+  };
 
   return (
     <div className="max-w-xl flex flex-col gap-4">
@@ -214,7 +214,7 @@ const NewPostgresInstanceForm = ({ pgUuid }: { pgUuid: string }) => {
               setWorkingPgInstance({
                 ...workingPginstace,
                 name: e.target.value,
-              })
+              });
             }}
             value={workingPginstace.name}
           />
@@ -229,7 +229,7 @@ const NewPostgresInstanceForm = ({ pgUuid }: { pgUuid: string }) => {
           <Input
             placeholder="postgres://user:password@host:port/database?sslmode=require"
             onChange={(e) => {
-              setConnectionString(e.target.value)
+              setConnectionString(e.target.value);
             }}
             value={connectionString}
           />
@@ -237,13 +237,13 @@ const NewPostgresInstanceForm = ({ pgUuid }: { pgUuid: string }) => {
             disabled={connectionString === ""}
             onClick={() => {
               try {
-                const parsedInstance = parseConnectionString(connectionString)
+                const parsedInstance = parseConnectionString(connectionString);
                 setWorkingPgInstance((w) => ({
                   ...w,
                   ...parsedInstance,
-                }))
+                }));
               } catch (error) {
-                toast.error("Failed to parse connection string")
+                toast.error("Failed to parse connection string");
               }
             }}
           >
@@ -260,7 +260,7 @@ const NewPostgresInstanceForm = ({ pgUuid }: { pgUuid: string }) => {
               setWorkingPgInstance({
                 ...workingPginstace,
                 pgUser: e.target.value,
-              })
+              });
             }}
             value={workingPginstace.pgUser}
           />
@@ -288,7 +288,7 @@ const NewPostgresInstanceForm = ({ pgUuid }: { pgUuid: string }) => {
                       existingPasswordToPgInstanceUuid: null,
                       newPassword: "",
                     },
-                  })
+                  });
                 }}
               >
                 Change password
@@ -305,7 +305,7 @@ const NewPostgresInstanceForm = ({ pgUuid }: { pgUuid: string }) => {
                     newPassword: e.target.value,
                     existingPasswordToPgInstanceUuid: null,
                   },
-                })
+                });
               }}
               value={workingPginstace.pgPassword?.newPassword ?? ""}
             />
@@ -321,7 +321,7 @@ const NewPostgresInstanceForm = ({ pgUuid }: { pgUuid: string }) => {
               setWorkingPgInstance({
                 ...workingPginstace,
                 pgHost: e.target.value,
-              })
+              });
             }}
             value={workingPginstace.pgHost}
           />
@@ -337,7 +337,7 @@ const NewPostgresInstanceForm = ({ pgUuid }: { pgUuid: string }) => {
               setWorkingPgInstance({
                 ...workingPginstace,
                 pgPort: parseInt(e.target.value),
-              })
+              });
             }}
             value={workingPginstace.pgPort}
           />
@@ -352,7 +352,7 @@ const NewPostgresInstanceForm = ({ pgUuid }: { pgUuid: string }) => {
               setWorkingPgInstance({
                 ...workingPginstace,
                 pgDatabase: e.target.value,
-              })
+              });
             }}
             value={workingPginstace.pgDatabase}
           />
@@ -368,7 +368,7 @@ const NewPostgresInstanceForm = ({ pgUuid }: { pgUuid: string }) => {
               setWorkingPgInstance({
                 ...workingPginstace,
                 ssl: e.target.value === "true",
-              })
+              });
             }}
             value={workingPginstace.ssl.toString()}
           >
@@ -382,7 +382,7 @@ const NewPostgresInstanceForm = ({ pgUuid }: { pgUuid: string }) => {
         <Button
           onClick={handleInitialTestConnection}
           isLoading={isTestingPgConnection}
-          className="bg-blue-500 hover:bg-blue-600 text-white flex items-center gap-1.5 shadow-sm"
+          className=" flex items-center gap-1.5 shadow-sm"
         >
           <BeakerIcon className="h-4 w-4" />
           Test connection
@@ -395,7 +395,7 @@ const NewPostgresInstanceForm = ({ pgUuid }: { pgUuid: string }) => {
                 updatePgInstance({
                   instance: workingPginstace,
                   uuid: pgInstance.uuid,
-                })
+                });
               }}
               isLoading={isUpdatingPgInstance}
               className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-1.5 shadow-sm"
@@ -406,12 +406,12 @@ const NewPostgresInstanceForm = ({ pgUuid }: { pgUuid: string }) => {
             <Button
               onClick={() => {
                 const confirm = window.confirm(
-                  "Are you sure you want to delete this instance?",
-                )
+                  "Are you sure you want to delete this instance?"
+                );
                 if (confirm) {
                   deletePgInstance({
                     uuid: pgInstance.uuid,
-                  })
+                  });
                 }
               }}
               isLoading={isDeletingPgInstance}
@@ -427,13 +427,13 @@ const NewPostgresInstanceForm = ({ pgUuid }: { pgUuid: string }) => {
           <Button
             onClick={() => {
               if (!me?.teamId) {
-                alert("Could not find your team")
-                return
+                alert("Could not find your team");
+                return;
               }
               addPgInstance({
                 instance: workingPginstace,
                 teamId: me.teamId,
-              })
+              });
             }}
             isLoading={isAddingPgInstance}
             className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-1.5 shadow-sm"
@@ -452,8 +452,8 @@ const NewPostgresInstanceForm = ({ pgUuid }: { pgUuid: string }) => {
         />
       )}
     </div>
-  )
-}
+  );
+};
 
 const TestResultShower = ({
   data,
@@ -461,18 +461,18 @@ const TestResultShower = ({
   onRefetch,
 }: {
   data: {
-    canSelect1: { status: string; errorMessage?: string | null }
-    canUsePgStatStatements: { status: string; errorMessage?: string | null }
-  }
-  pgUser: string
-  onRefetch: () => void
+    canSelect1: { status: string; errorMessage?: string | null };
+    canUsePgStatStatements: { status: string; errorMessage?: string | null };
+  };
+  pgUser: string;
+  onRefetch: () => void;
 }) => {
-  const connectionSuccessful = data.canSelect1.status === "success"
+  const connectionSuccessful = data.canSelect1.status === "success";
   const pgStatStatementsWorking =
-    data.canUsePgStatStatements.status === "success"
+    data.canUsePgStatStatements.status === "success";
 
-  const allTestsPass = connectionSuccessful && pgStatStatementsWorking
-  const hasErrors = !connectionSuccessful || !pgStatStatementsWorking
+  const allTestsPass = connectionSuccessful && pgStatStatementsWorking;
+  const hasErrors = !connectionSuccessful || !pgStatStatementsWorking;
 
   return (
     <div className="mt-6 p-6 border rounded-md bg-slate-50">
@@ -567,7 +567,7 @@ const TestResultShower = ({
                     </div>
 
                     {data.canUsePgStatStatements.errorMessage?.includes(
-                      "does not exist",
+                      "does not exist"
                     ) && (
                       <p className="mt-2 text-slate-600 text-sm">
                         <strong>Note:</strong> The error indicates that the
@@ -587,5 +587,5 @@ const TestResultShower = ({
         )}
       </div>
     </div>
-  )
-}
+  );
+};

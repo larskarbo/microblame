@@ -59,7 +59,7 @@ export const insightRouter = router({
           stats_reset: string;
         }[]
       >`
-				SELECT * FROM public.pg_stat_statements_info();
+				SELECT * FROM pg_stat_statements_info();
 				`;
 
       const lastReset = lastResetRaw[0]?.stats_reset;
@@ -97,7 +97,6 @@ export const insightRouter = router({
         };
       } catch (err) {
         const message = getErrorMessage(err);
-        console.log("message: ", message);
         if (
           message === "permission denied for function pg_stat_statements_reset"
         ) {
@@ -133,7 +132,6 @@ export const insightRouter = router({
               await findSingleTracedQueryByQuery(queryWithoutComment),
               new Promise((resolve) => {
                 setTimeout(() => {
-                  console.log("timeout");
                   resolve(null);
                 }, 20_000);
               }),
