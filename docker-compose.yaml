@@ -97,3 +97,23 @@ services:
       - ./secrets:/run/secrets
     command: bun run src/utils/snapshot-worker/snapshotWorker.ts
     restart: on-failure
+
+  mcp-server:
+    depends_on:
+      clickhouse:
+        condition: service_healthy
+      app-db:
+        condition: service_started
+    build:
+      dockerfile: ./worker.Dockerfile
+    environment:
+      - CLICKHOUSE_URI=http://default:clickhouse_password@clickhouse:8123
+      - REDIS_URL=redis://redis:6379
+      - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@app-db:5432/${POSTGRES_DB}
+      - PASSWORD_ENCRYPTION_SECRET_FILE=/run/secrets/password_encryption_secret
+    volumes:
+      - ./secrets:/run/secrets
+    ports:
+      - "3120:3120"
+    command: bun run src/mcpServer/mcpServer.ts
+    restart: on-failure

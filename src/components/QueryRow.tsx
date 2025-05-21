@@ -6,6 +6,9 @@ import { trpc } from "../utils/trpc";
 import { Code } from "./Code";
 import { PgRow } from "../utils/insight/pgStatQueries";
 import { SnapshottedQuery } from "../server/snapshot/snapshottedQuery";
+import { toast } from "sonner";
+import type { inferRouterOutputs } from "@trpc/server";
+import type { AppRouter } from "../server/routers/router";
 
 export const QueryRow = ({
   pgRow: pgRow,
@@ -121,6 +124,8 @@ const QueryDetailsOverlay = ({
   tracedQueryWithStats: any;
   sampleTracedQuery: any;
 }) => {
+  const simplifyQueryMutation = trpc.ai.simplifyQuery.useMutation({});
+  const queryToSimplify = sampleTracedQuery?.dbStatement || pgRow.query;
   return (
     <>
       {/* Transparent overlay for closing */}
@@ -168,6 +173,15 @@ const QueryDetailsOverlay = ({
               code={sampleTracedQuery?.dbStatement || pgRow.query}
             />
           </div>
+          {simplifyQueryMutation.data?.simplifiedSql && (
+            <div>
+              <Code
+                className="h-48 overflow-auto whitespace-break-spaces text-[10px] w-full"
+                language="sql"
+                code={simplifyQueryMutation.data.simplifiedSql}
+              />
+            </div>
+          )}
           {/* Observability data */}
           <div>
             <div className="font-semibold">Observability data</div>
@@ -203,6 +217,34 @@ const QueryDetailsOverlay = ({
               </>
             ) : (
               <div className="text-gray-600">No observability data found</div>
+            )}
+          </div>
+          <div>
+            <button
+              className="px-3 py-1 rounded bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60"
+              onClick={() =>
+                simplifyQueryMutation.mutate({ query: queryToSimplify })
+              }
+              disabled={simplifyQueryMutation.isPending}
+            >
+              {simplifyQueryMutation.isPending
+                ? "Simplifying..."
+                : "Simplify Query"}
+            </button>
+            {simplifyQueryMutation.isError && (
+              <div className="text-red-500 mt-2">
+                {simplifyQueryMutation.error.message}
+              </div>
+            )}
+            {simplifyQueryMutation.data?.shortDescription && (
+              <div className="mt-4 p-2 bg-gray-50 border rounded text-sm whitespace-pre-line">
+                {simplifyQueryMutation.data.shortDescription}
+              </div>
+            )}
+            {simplifyQueryMutation.data?.simplifiedSql && (
+              <div className="mt-4 p-2 bg-gray-50 border rounded text-sm whitespace-pre-line">
+                {simplifyQueryMutation.data.simplifiedSql}
+              </div>
             )}
           </div>
         </div>
